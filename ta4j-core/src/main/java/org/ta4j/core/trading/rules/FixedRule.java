@@ -28,6 +28,11 @@ import org.ta4j.core.TradingRecord;
 import java.util.Arrays;
 
 /**
+ *
+ *   * 基于索引的规则。
+ *   *
+ *   * 满足提供的索引。
+ *
  * An indexes-based rule.
  *
  * Satisfied for provided indexes.
