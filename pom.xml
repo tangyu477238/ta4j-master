@@ -10,6 +10,14 @@
 	<url>http://github.com/ta4j/ta4j</url>
 	<inceptionYear>2014</inceptionYear>
 
+	<!-- parent指明继承关系，给出被继承的父项目的具体信息-->
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.4.2</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
 	<developers>
 		<developer>
 			<name>Marc de Verdelhan</name>
@@ -58,7 +66,8 @@
 	<modules>
 		<module>ta4j-core</module>
 		<module>ta4j-examples</module>
-	</modules>
+        <module>platform</module>
+    </modules>
 
 	<properties>
 		<!-- Encoding -->

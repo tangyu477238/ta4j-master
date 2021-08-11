@@ -85,10 +85,10 @@ public class EmaTest {
     @Test
     public void getData() {
 
-        String bondId = "000001";
+        String bondId = "128097";
         BarSeries series  = getBarSeries(bondId); //获取数据
-//        addIndicator(series, bondId); //数据存储
-        buildStrategy(series, bondId); //执行策略
+        addIndicator(series, bondId); //数据存储
+//        buildStrategy(series, bondId); //执行策略
 
 
 
@@ -382,7 +382,7 @@ public class EmaTest {
 
 
     private BarSeries getBarSeries(String bondId){
-        List<GupiaoKline> gupiaoKline = gupiaoKlineRepository.getSymbolTop(bondId,1500);
+        List<GupiaoKline> gupiaoKline = gupiaoKlineRepository.getSymbolTop(bondId,1000);
         if (gupiaoKline.isEmpty()) return null;
 
         // 反转lists
@@ -392,9 +392,8 @@ public class EmaTest {
 //            System.out.println(kline.getTimestamp()+"--"+kline.getOpen()+"--"+kline.getHigh()+"--"+kline.getLow()+"--"+ kline.getClose()+"--"+kline.getVolume());
             ZonedDateTime date = ZonedDateTime.parse(kline.getTimestamp() + " PST",
                     DateTimeFormatter.ofPattern("yyyy-MM-dd H:m:s.S z"));
-            series.addBar(new BaseBar(Duration.ofDays(1), date,
-                    new BigDecimal(kline.getOpen()), new BigDecimal(kline.getHigh()),
-                    new BigDecimal(kline.getLow()), new BigDecimal(kline.getClose()), new BigDecimal(kline.getVolume())));
+            series.addBar(date, new BigDecimal(kline.getOpen()), new BigDecimal(kline.getHigh()),
+                    new BigDecimal(kline.getLow()), new BigDecimal(kline.getClose()), new BigDecimal(kline.getVolume()));
         });
         return series;
     }
