@@ -24,6 +24,7 @@
 package com.chuancai.tfish;
 
 import com.chuancai.tfish.indicators.*;
+import com.chuancai.tfish.indicators.impl.ZJRCIndicatorImpl;
 import com.chuancai.tfish.model.Gupiao;
 import com.chuancai.tfish.model.GupiaoKline;
 import com.chuancai.tfish.model.GupiaoXinhao;
@@ -84,9 +85,9 @@ public class EmaTest {
     @Test
     public void getData() {
 
-        String bondId = "603168";
+        String bondId = "000001";
         BarSeries series  = getBarSeries(bondId); //获取数据
-        addIndicator(series, bondId); //数据存储
+//        addIndicator(series, bondId); //数据存储
         buildStrategy(series, bondId); //执行策略
 
 
@@ -153,7 +154,7 @@ public class EmaTest {
 
     }
 
-    private void addJAXIndicator(BarSeries series,String bondId){
+    private void addJaxIndicator(BarSeries series,String bondId){
         JAXIndicator jax = new JAXIndicator(series);
         int nbBars = series.getBarCount();
         for (int i = 0; i < nbBars; i++) {
@@ -163,6 +164,21 @@ public class EmaTest {
             gupiaoXinhao.setType(2);
             gupiaoXinhao.setTypeName("jax");
             gupiaoXinhao.setSj1(new BigDecimal(jax.getValue(i).doubleValue()));
+            gupiaoXinhaoRepository.save(gupiaoXinhao);
+        }
+
+    }
+
+    private void addXlplIndicator(BarSeries series,String bondId){
+        XLPLAIndicator xlpl = new XLPLAIndicator(series);
+        int nbBars = series.getBarCount();
+        for (int i = 0; i < nbBars; i++) {
+            GupiaoXinhao gupiaoXinhao = new GupiaoXinhao();
+            gupiaoXinhao.setBizDate(series.getBar(i).getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE));
+            gupiaoXinhao.setSymbol(bondId);
+            gupiaoXinhao.setType(2);
+            gupiaoXinhao.setTypeName("xlpl");
+            gupiaoXinhao.setSj1(new BigDecimal(xlpl.getValue(i).doubleValue()));
             gupiaoXinhaoRepository.save(gupiaoXinhao);
         }
 
@@ -200,7 +216,8 @@ public class EmaTest {
 
         addMacdIndicator(series, bondId); //macd
         addZjrcIndicator(series, bondId); //zjrc //资金入场
-        addJAXIndicator(series, bondId); //jax //济安线
+        addJaxIndicator(series, bondId); //jax //济安线
+        addXlplIndicator(series, bondId); //xlpl //西拉派罗
         addMaIndicator(series, bondId); //ma //均线
 
 
@@ -306,14 +323,19 @@ public class EmaTest {
         SMAIndicator ma60 = new SMAIndicator(closePrice, 60);
         SMAIndicator ma120 = new SMAIndicator(closePrice, 120);
         SMAIndicator ma250 = new SMAIndicator(closePrice, 250);
-        return new OverIndicatorRule(closePrice, ma5)
-                .and(new OverIndicatorRule(ma5, ma10))
-                .and(new OverIndicatorRule(ma10, ma20))
-                .and(new OverIndicatorRule(ma20, ma60))
-//                .and(new OverIndicatorRule(ma60, ma120))
-                .and(new OverIndicatorRule(ma60, ma250))
-                .and(new IsEqualRule(xlpl, 1))
-                .and(new OverIndicatorRule(closePrice, openPrice));
+
+        ZJRCIndicatorImpl zjrc = new ZJRCIndicatorImpl(series);
+
+        return new OverIndicatorRule(zjrc, 0);
+
+//        return new OverIndicatorRule(closePrice, ma5)
+//                .and(new OverIndicatorRule(ma5, ma10))
+//                .and(new OverIndicatorRule(ma10, ma20))
+//                .and(new OverIndicatorRule(ma20, ma60))
+////                .and(new OverIndicatorRule(ma60, ma120))
+//                .and(new OverIndicatorRule(ma60, ma250))
+//                .and(new IsEqualRule(xlpl, 1))
+//                .and(new OverIndicatorRule(closePrice, openPrice));
 
 //        return new OverIndicatorRule(ma20, ma60)
 ////                .and(new IsEqualRule(xlpl, 1))
@@ -353,7 +375,6 @@ public class EmaTest {
 //        return  new StopGainRule(closePrice,15).or(new UnderIndicatorRule(closePrice, ma20));
 
         XLPLIndicator xlpl = new XLPLIndicator(series);
-
         return  new UnderIndicatorRule(closePrice, ma20)
                 .or(new IsEqualRule(xlpl, 2));
     }
