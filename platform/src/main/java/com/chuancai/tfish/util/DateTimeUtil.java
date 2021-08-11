@@ -1,6 +1,7 @@
 package com.chuancai.tfish.util;
 
-import java.text.DateFormat;
+import org.apache.commons.lang3.time.DateFormatUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -8,7 +9,7 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * @author lottery
+ * @author liugh
  * @since on 2018/5/8.
  */
 public class DateTimeUtil {
@@ -105,6 +106,11 @@ public class DateTimeUtil {
      */
     public final static String FMT_yyyyMMddHHmmssS_17 = "yyyyMMddHHmmssS";
 
+    /**
+     * 把时间格式化成如：020803082630400格式的(15位)字符串
+     */
+
+    public final static String FMT_yyyyMMddHHmmssS_15 = "yyMMddHHmmssS";
     /**
      * 把时间格式化成如：20020803082630格式的(14位)字符串
      */
@@ -518,16 +524,6 @@ public class DateTimeUtil {
     public static String formatDateTimetoString(Date dateTime) {
         return formatDateTimetoString(dateTime, FMT_yyyyMMddHHmmss);
     }
-    /**
-     * 将给定的日期时间按操作系统默认的国家内格格式化成"yyyy-MM-dd HH:mm:ssS"格式的日期时间串
-     *
-     * @param dateTime
-     *            日期对象
-     * @return 如果为null，返回""
-     */
-    public static String formatDateTimetoStrings(Date dateTime) {
-        return formatDateTimetoString(dateTime, FMT_yyyyMMddHHmmssS);
-    }
 
     /**
      * 将给定的日期时间按指定国家的风格格式化成"yyyy-MM-dd HH:mm:ss"格式的日期时间串
@@ -579,18 +575,6 @@ public class DateTimeUtil {
      */
     public static String formatDatetoString(Date d) {
         return formatDateTimetoString(d, FMT_yyyyMMdd_8);
-    }
-
-
-    /**
-     * 将给定的日期按指定操作系统默认国家的风格格式化成"yyyy-MM-dd"格式的日期串
-     *
-     * @param d
-     *            日期对象
-     * @return 如果为null，返回""
-     */
-    public static String dateToString(Date d) {
-        return formatDateTimetoString(d, FMT_yyyyMMdd);
     }
 
     /**
@@ -892,7 +876,6 @@ public class DateTimeUtil {
 
     /**
      * 比较两个时间的先后顺序。 如果时间d1在d2之前，返回1，如果时间d1在d2之后，返回-1，如果二者相等，返回0
-     * d1<d2 返回 1
      *
      * @param d1
      *            日期对象
@@ -997,13 +980,58 @@ public class DateTimeUtil {
      *            日期对象
      * @return 两日期之间相差的天数
      */
-    public static double getDaysOfTwoDate(Date d1, Date d2) {
+    public static int getDaysOfTwoDate(Date d1, Date d2) {
         if (d1 == null || d2 == null) {
             throw new IllegalArgumentException("参数d1或d2不能是null对象！");
         }
         long millions = getMillisecondsOfTwoDate(d1, d2);
-        return (double) millions / 24 / 60 / 60 / 1000;
+        return (int) millions / 24 / 60 / 60 / 1000;
     }
+
+
+
+
+    /**
+
+     * 计算两个日期之间相差的天数
+
+     * @param smdate 较小的时间
+
+     * @param bdate 较大的时间
+
+     * @return 相差天数
+
+     * @throws ParseException
+
+     */
+
+    public static int daysBetween(Date smdate, Date bdate) throws ParseException
+
+    {
+
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+
+        smdate=sdf.parse(sdf.format(smdate));
+
+        bdate=sdf.parse(sdf.format(bdate));
+
+        Calendar cal = Calendar.getInstance();
+
+        cal.setTime(smdate);
+
+        long time1 = cal.getTimeInMillis();
+
+        cal.setTime(bdate);
+
+        long time2 = cal.getTimeInMillis();
+
+        long between_days=(time2-time1)/(1000*3600*24);
+
+        return Integer.parseInt(String.valueOf(between_days));
+
+    }
+
+
 
     /**
      * 把给定的时间加上指定的时间值，可以为负
@@ -1120,7 +1148,7 @@ public class DateTimeUtil {
         }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(d);
-        calendar.add(Calendar.DATE, days);
+        calendar.add(Calendar.HOUR, days * 24);
         return calendar.getTime();
     }
 
@@ -1419,34 +1447,26 @@ public class DateTimeUtil {
     }
 
     /**
-     * 获取当前日期的几天前或几天后日期
-     * @return
+     * 取得30天前的这个时间
+     *
+     * @return 新日期对象
      */
-    public static String getCurrentBeforeNum(int num){
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.add(Calendar.DATE, num);
-        return dateToString(cal.getTime());
+    public static Date getDayLastMonth() {
+        long day = new Date().getTime();
+        long dayLastMonth = day - 24 * 60 * 60 * 1000 * 20;
+        return new Date(dayLastMonth);
     }
-
-
-
 
     /**
-     * 获取SimpleDateFormat
+     * 取得30天后的这个时间
      *
-     * @param pattern 日期格式
-     * @return
+     * @return 新日期对象
      */
-    public static SimpleDateFormat getDateFormat(String pattern) {
-        if (pattern != null && pattern.equals("")) {
-            throw new RuntimeException("无效日期格式");
-        }
-        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-        return dateFormat;
+    public static Date getDayNextMonth() {
+        long day = new Date().getTime();
+        long dayNextMonth = day + 20 * 24 * 60 * 60 * 1000;
+        return new Date(dayNextMonth);
     }
-
-
 
     /**
      * 计算两个时间见得月份差，可为负数
@@ -1628,6 +1648,47 @@ public class DateTimeUtil {
         return value;
     }
 
+    /**
+     * 动态表示方式的时间差函数
+     *
+     * @param startDate
+     *            指定时间
+     * @param endDate
+     *            结束时间
+     * @return 时间差指定格式字符串
+     */
+    public static String dynDiff(Date startDate, Date endDate) {
+
+        String startDay = DateFormatUtils.format(startDate, "dd");
+        String endtDay = DateFormatUtils.format(endDate, "dd");
+        String value = "";
+        if (startDay.equals(endtDay)) {
+            value = DateFormatUtils.format(startDate, " HH:mm");
+        } else {
+            value = otherDiff(startDate, endDate);
+        }
+        return value;
+    }
+
+    /**
+     * 资源表示方式的时间差函数
+     *
+     * @param startDate
+     *            指定时间
+     * @param endDate
+     *            结束时间
+     * @return 时间差指定格式字符串
+     */
+    public static String resDiff(Date startDate, Date endDate) {
+        Object[] obj = timeDifference(startDate, endDate);
+        String value = "";
+        if (Long.parseLong(obj[3].toString()) > 7) {
+            value = DateFormatUtils.format(startDate, "yyyy-MM-dd HH:mm");
+        } else {
+            value = otherDiff(startDate, endDate);
+        }
+        return value;
+    }
 
     /**
      * 时间差
@@ -1707,247 +1768,82 @@ public class DateTimeUtil {
     }
 
 
-    public static String getCycle(Date date){
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-//        calendar.setTimeInMillis(System.currentTimeMillis());//获得当前的时间戳
-        int weekYear = calendar.get(Calendar.YEAR);//获得当前的年
-        int weekOfYear = calendar.get(Calendar.WEEK_OF_YEAR);//获得当前日期属于今年的第几周
-        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);//获得当前日期属于这周的第几天
-        int cycle = (weekOfYear-1) * 3;
-        if(dayOfWeek==1){
-            cycle = cycle + 3 ;
-        } else if (dayOfWeek==2){
-            cycle = cycle + 1 ;
-        } else if (dayOfWeek==3){
-            cycle = cycle + 1 ;
-        } else if (dayOfWeek==4){
-            cycle = cycle + 2 ;
-        } else if (dayOfWeek==5){
-            cycle = cycle + 2 ;
-        } else if (dayOfWeek==6){
-            cycle = cycle + 3 ;
-        } else if (dayOfWeek==7){
-            cycle = cycle + 3 ;
-        }
-        return new StringBuffer().append(weekYear).append(String.format("%03d", cycle)).toString();
-    }
-
-    public static String getCycle(Date date,int num){
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-//        calendar.setTimeInMillis(System.currentTimeMillis());//获得当前的时间戳
-        int weekYear = calendar.get(Calendar.YEAR);//获得当前的年
-        int weekOfYear = calendar.get(Calendar.WEEK_OF_YEAR);//获得当前日期属于今年的第几周
-        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);//获得当前日期属于这周的第几天
-        int cycle = (weekOfYear-1) * 3;
-        if(dayOfWeek==1){
-            cycle = cycle + 3 ;
-        } else if (dayOfWeek==2){
-            cycle = cycle + 1 ;
-        } else if (dayOfWeek==3){
-            cycle = cycle + 1 ;
-        } else if (dayOfWeek==4){
-            cycle = cycle + 2 ;
-        } else if (dayOfWeek==5){
-            cycle = cycle + 2 ;
-        } else if (dayOfWeek==6){
-            cycle = cycle + 3 ;
-        } else if (dayOfWeek==7){
-            cycle = cycle + 3 ;
-        }
-        return new StringBuffer().append(weekYear).append(String.format("%03d", cycle+num)).toString();
-    }
-
-
-    public static Date  getCycleDate(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);//获得当前日期属于这周的第几天
-
-        if(dayOfWeek==2 || dayOfWeek==4 || dayOfWeek==7){ //星期一/星期三/星期六
-            date = DateTimeUtil.addTime(date, 1, Calendar.DATE);//增加1天
-        } else if (dayOfWeek==6){
-            date = DateTimeUtil.addTime(date, 2, Calendar.DATE);//增加2天
-        } else if (dayOfWeek==1||dayOfWeek==3){ //星期天和星期二
-
-        } else if (dayOfWeek==5){ //星期四
-            //cycle = cycle + 2 ;
-        }
-        return date;
-    }
-
-
-    public static String  getCycleTime(Date date) {
-        date = getCycleDate(date);
-        return DateTimeUtil.formatDateTimetoString(date, DateTimeUtil.FMT_yyyyMMdd)+" 21:15:00";
-    }
-
-    public static String  getCycleWeek(Date date) {
-        date = getCycleDate(date);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        String week;
-        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);//获得当前日期属于这周的第几天
-        if(dayOfWeek==2 || dayOfWeek==4 || dayOfWeek==7){ //星期一/星期三/星期六
-            week = "周一";
-        } else if (dayOfWeek==3){
-            week = "周二";
-        } else if (dayOfWeek==4){
-            week = "周三";
-        } else if (dayOfWeek==5){
-            week = "周四";
-        }else if (dayOfWeek==6){
-            week = "周五";
-        }else if (dayOfWeek==7){
-            week = "周六";
-        }else{
-            week = "周日";
-        }
-        return week;
-    }
-
-    public static String  getNowDate() {
-        return DateTimeUtil.formatDateTimetoString(new Date(),DateTimeUtil.FMT_yyyyMMdd);
-    }
-
-    public static Date  getDateTime(String time) throws Exception{
-        return getDateTime(getNowDate(),time);
-    }
-
-    public static Date  getDateTime(String date, String time) throws Exception{
-        return parseToDate( date + " " + time);
-    }
-
-
     /**
-     * 日期转星期 lnh
+     * 获取当前时间的前一天时间
      *
-     * @param datetime
+     * @param dayNum
      * @return
      */
-    public static String dateToWeek(String datetime) {
-        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
-        String[] weekDays = { "周日", "周一", "周二", "周三", "周四", "周五", "周六" };
-        Calendar cal = Calendar.getInstance(); // 获得一个日历
-        Date datet = null;
-        try {
-            datet = f.parse(datetime);
-            cal.setTime(datet);
-        } catch (ParseException e) {
-            e.printStackTrace();
+    public static String getBeforeDay(int dayNum) {
+        Calendar calendar = Calendar.getInstance(); // 此时打印它获取的是系统当前时间
+        calendar.add(Calendar.DATE, dayNum); // 得到前一天
+        return new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
+    }
+    //当前月
+    public static String getMonth() {
+        Calendar calendar = Calendar.getInstance(); // 此时打印它获取的是系统当前时间
+        calendar.add(Calendar.DATE, 0); //
+        return new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()).substring(0,7);
+    }
+
+    //获取当前月第一天
+    public static String getMonthOfFistDay(int monthNum) {
+
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.MONTH, monthNum);
+        c.set(Calendar.DAY_OF_MONTH,1);//设置为1号,当前日期既为本月第一天
+        String first = new SimpleDateFormat("yyyy-MM-dd").format(c.getTime());
+        System.out.println("===============first:"+first);
+
+        return first;
+    }
+
+
+    ///获取当前月最后一天 date
+    public static Date getMonthOfLastDayDate(int monthNum) {
+        Calendar ca = Calendar.getInstance();
+        ca.add(Calendar.MONTH, monthNum);
+        ca.set(Calendar.DAY_OF_MONTH, ca.getActualMaximum(Calendar.DAY_OF_MONTH));
+        return ca.getTime();
+    }
+
+    ///获取当前月最后一天 String
+    public static String getMonthOfLastDay(int monthNum) {
+        String last = new SimpleDateFormat("yyyy-MM-dd").format(getMonthOfLastDayDate(monthNum));
+        System.out.println("===============last:"+last);
+        return last;
+    }
+
+    public static String getMonthDay(int num){
+        if(num==1){
+            return DateTimeUtil.getMonthOfFistDay(0).substring(5,10);
+        }else if(num==2){
+            return DateTimeUtil.getMonthOfLastDay(0).substring(5,10);
+        }else if(num==3){
+            return DateTimeUtil.getMonthOfFistDay(1).substring(5,10);
+        }else if(num==4){
+            return DateTimeUtil.getMonthOfLastDay(1).substring(5,10);
+        }else if(num==5){
+            return DateTimeUtil.getMonthOfFistDay(0).substring(0,7);
+        }else if(num==6){
+            return DateTimeUtil.getMonthOfLastDay(1).substring(0,7);
+        }else {
+            return null;
         }
-        int w = cal.get(Calendar.DAY_OF_WEEK) - 1; // 指示一个星期中的某天。
-        if (w < 0)
-            w = 0;
-        return weekDays[w];
     }
 
+    public static void main (String str []){
+//        System.out.println(DateTimeUtil.getMonthOfFistDay(2).substring(5,10));
+//        System.out.println(DateTimeUtil.getMonthOfLastDay(2).substring(5,10));
+//        System.out.println(DateTimeUtil.getSecondsOfTwoDate(new Date(),DateTimeUtil.addHours(new Date(),1)));
 
-    /**
-     * 日期转星期 lnh
-     *
-     * @param datetime
-     * @return
-     */
-    public static String getDateToWeek(String datetime) {
-        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
-        String[] weekDays = { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" };
-        Calendar cal = Calendar.getInstance(); // 获得一个日历
-        Date datet = null;
-        try {
-            datet = f.parse(datetime);
-            cal.setTime(datet);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        int w = cal.get(Calendar.DAY_OF_WEEK) - 1; // 指示一个星期中的某天。
-        if (w < 0)
-            w = 0;
-        return weekDays[w];
+//        SimpleDateFormat formater = new SimpleDateFormat("H:mm");
+//        String strCurrentTime = formater.format(new Date());
+//        System.out.print(strCurrentTime);
+
+        System.out.println(DateTimeUtil.addDays(new Date(),7));
+        System.out.println(getDaysOfTwoDate(getMonthOfLastDayDate(0),new Date()));
+        System.out.println(getDaysOfTwoDate(getMonthOfLastDayDate(0), DateTimeUtil.addDays(new Date(),-1)));
     }
-
-    public static String  getNowMonth() {
-        return DateTimeUtil.formatDateTimetoString(new Date(),DateTimeUtil.FMT_yyyyMM);
-    }
-
-    public static String  getyyyyMMddByDate(Date date) {
-        return DateTimeUtil.formatDateTimetoString(date,DateTimeUtil.FMT_yyyyMMdd);
-    }
-
-    /**
-     * 获取当前日期-年月日
-     * @return
-     */
-    public static String  getNowYearMonthDay() {
-        return DateTimeUtil.formatDateTimetoString(new Date(),DateTimeUtil.FMT_yyyyMMdd);
-    }
-
-
-    /**
-     * 将Fri Jul 19 11:05:06 CST 2019 转成 yyyy-MM-dd HH:mm:ss     lnh
-     * @param
-     */
-    public static Date getDateTo(Date time){
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
-        //java.util.Date对象
-        Date date = null;
-        try {
-            date = (Date) sdf.parse(time.toString());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        //2009-09-16
-        String formatStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-       // 将string 转 date
-        Date parse = null;
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try {
-            parse = format.parse(formatStr);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        return parse;
-    }
-
-    //返回指定日期是星期几
-    public static String getWeekday(String date){//必须yyyy-MM-dd
-        // 创建“简体中文”的Locale
-
-        Locale localeCN = Locale.SIMPLIFIED_CHINESE;
-        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat sdw = new SimpleDateFormat("EEEE",localeCN);
-        Date d = null;
-        try {
-            d = sd.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return sdw.format(d);
-    }
-
-
-    public static void main(String strs[]){
-
-
-        try {
-            System.out.println();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-//
-//        System.out.println(DateTimeUtil.addTime(new Date(),30,Calendar.MINUTE).toLocaleString());
-//
-//        System.out.println(DateTimeUtil.getNowMonth());
-//
-//        System.out.println(DateTimeUtil.getNowYearMonthDay());
-//
-        System.out.println(DateTimeUtil.addDays(new Date(),8));
-
-        System.out.println(getCurrentBeforeNum(-30));
-
-    }
-
 
 }

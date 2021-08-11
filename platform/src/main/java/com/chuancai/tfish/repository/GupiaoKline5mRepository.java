@@ -16,7 +16,7 @@ public interface GupiaoKline5mRepository extends JpaRepository<GupiaoKline5m,Int
 
     GupiaoKline5m findBySymbolAndPeriodAndBizDate(String bondId, String period, String bizDate);
 
-    @Query(value = "select * from gupiao_kline_5m where symbol = ?1 and biz_date>='2020-01-01' order by biz_date desc  LIMIT 0, ?2 ", nativeQuery = true)
+    @Query(value = "select * from gupiao_kline_5m where symbol = ?1 and biz_date>='2021-07-01' order by biz_date desc  LIMIT 0, ?2 ", nativeQuery = true)
     List<GupiaoKline5m> getSymbolTop(String bondId, int topNum);
 
 }
