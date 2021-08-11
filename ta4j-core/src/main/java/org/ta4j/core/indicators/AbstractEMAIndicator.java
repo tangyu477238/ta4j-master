@@ -46,7 +46,7 @@ public abstract class AbstractEMAIndicator extends RecursiveCachedIndicator<Num>
 
     @Override
     protected Num calculate(int index) {
-        if (index == 0) {
+        if (index < 1) {
             Num num = indicator.getValue(0);
             return num;
         }

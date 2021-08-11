@@ -398,6 +398,7 @@ public class BaseBarSeries implements BarSeries {
             }
             final int lastBarIndex = bars.size() - 1;
             ZonedDateTime seriesEndTime = bars.get(lastBarIndex).getEndTime();
+            log.info(seriesEndTime+"-------"+bar.getEndTime());
             if (!bar.getEndTime().isAfter(seriesEndTime)) {
                 throw new IllegalArgumentException(
                         String.format("Cannot add a bar with end time:%s that is <= to series end time: %s",
