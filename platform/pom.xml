@@ -11,8 +11,8 @@
     <artifactId>platform</artifactId>
 
     <packaging>war</packaging>
-    <name>WeatherSpider</name>
-    <description>miaoshu</description>
+    <name>platform</name>
+    <description>描述信息</description>
 
 
     <properties>
