@@ -4,12 +4,11 @@ import com.chuancai.tfish.indicators.EmaMACDIndicator;
 import com.chuancai.tfish.indicators.JAXIndicator;
 import com.chuancai.tfish.indicators.XLPLAIndicator;
 import com.chuancai.tfish.indicators.ZJRCIndicator;
-import com.chuancai.tfish.model.GupiaoKline5m;
+import com.chuancai.tfish.model.GupiaoKline;
 import com.chuancai.tfish.model.GupiaoXinhao;
-import com.chuancai.tfish.repository.GupiaoKline5mRepository;
-import com.chuancai.tfish.repository.GupiaoRepository;
+import com.chuancai.tfish.repository.GupiaoKlineRepository;
 import com.chuancai.tfish.repository.GupiaoXinhaoRepository;
-import com.chuancai.tfish.util.DateTimeUtil;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.BaseBarSeriesBuilder;
@@ -22,27 +21,37 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 @Service
+@Data
 public class KzzStrategy {
+
+    private String period;
 
     @Resource
     private GupiaoXinhaoRepository gupiaoXinhaoRepository;
 
     @Resource
-    private GupiaoKline5mRepository gupiaoKline5mRepository;
+    private GupiaoKlineRepository gupiaoKlineRepository;
+
 
     public BarSeries getBarSeries(String bondId){
-        List<GupiaoKline5m> gupiaoKline = gupiaoKline5mRepository.getSymbolTop(bondId,300);
+        List<GupiaoKline> gupiaoKline = null;
+        if ("5m".equals(period)){
+            gupiaoKline = gupiaoKlineRepository.getKline5m(bondId);
+        } else if ("day".equals(period)){
+            gupiaoKline = gupiaoKlineRepository.getKline(bondId);
+        }
         if (gupiaoKline.isEmpty()) return null;
-
         // 反转lists
         Collections.reverse(gupiaoKline);
         BarSeries series = new BaseBarSeriesBuilder().withName(bondId).build();
         gupiaoKline.forEach(kline ->{
-//            System.out.println(kline.getTimestamp()+"--"+kline.getOpen()+"--"+kline.getHigh()+"--"+kline.getLow()+"--"+ kline.getClose()+"--"+kline.getVolume());
+//          log.info(kline.getTimestamp()+"--"+kline.getOpen()+"--"+kline.getHigh()
+//          +"--"+kline.getLow()+"--"+ kline.getClose()+"--"+kline.getVolume());
             ZonedDateTime date = ZonedDateTime.parse(kline.getTimestamp() + " PST",
                     DateTimeFormatter.ofPattern("yyyy-MM-dd H:m:s.S z"));
             series.addBar(date, new BigDecimal(kline.getOpen()), new BigDecimal(kline.getHigh()),
@@ -50,6 +59,8 @@ public class KzzStrategy {
         });
         return series;
     }
+
+
 
 
 
@@ -63,21 +74,21 @@ public class KzzStrategy {
         for (int i = 0; i < nbBars; i++) {
 //            if (i>=nbBars-3 && i<nbBars) {
 
-            GupiaoXinhao gupiaoXinhao = new GupiaoXinhao();
-            gupiaoXinhao.setBizDate(series.getBar(i).getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE));
-            gupiaoXinhao.setSymbol(bondId);
-            gupiaoXinhao.setType(0);
-            gupiaoXinhao.setTypeName("macd");
-
-            GupiaoXinhao gupiaoXinhao_1  = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDate(bondId,
-                    gupiaoXinhao.getTypeName(),gupiaoXinhao.getBizDate());
-            if (gupiaoXinhao_1!=null){
-                gupiaoXinhao.setId(gupiaoXinhao_1.getId());
-            }
-            gupiaoXinhao.setSj1(new BigDecimal(dif.getValue(i).doubleValue()));
-            gupiaoXinhao.setSj2(new BigDecimal(dea.getValue(i).doubleValue()));
-            gupiaoXinhao.setSj3(new BigDecimal(emaMACDIndicator.getValue(i).doubleValue()));
-            gupiaoXinhaoRepository.save(gupiaoXinhao);
+//            GupiaoXinhao gupiaoXinhao = new GupiaoXinhao();
+//            gupiaoXinhao.setBizDate(series.getBar(i).getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE));
+//            gupiaoXinhao.setSymbol(bondId);
+//            gupiaoXinhao.setType(0);
+//            gupiaoXinhao.setTypeName("macd");
+//
+//            GupiaoXinhao gupiaoXinhao_1  = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDate(bondId,
+//                    gupiaoXinhao.getTypeName(),gupiaoXinhao.getBizDate());
+//            if (gupiaoXinhao_1!=null){
+//                gupiaoXinhao.setId(gupiaoXinhao_1.getId());
+//            }
+//            gupiaoXinhao.setSj1(new BigDecimal(dif.getValue(i).doubleValue()));
+//            gupiaoXinhao.setSj2(new BigDecimal(dea.getValue(i).doubleValue()));
+//            gupiaoXinhao.setSj3(new BigDecimal(emaMACDIndicator.getValue(i).doubleValue()));
+//            gupiaoXinhaoRepository.save(gupiaoXinhao);
 
 //            }
         }
@@ -85,51 +96,48 @@ public class KzzStrategy {
     }
 
     private String formatterDate(ZonedDateTime bizDate){
-        return bizDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME).replace("T"," ").substring(0,16);
+        String pdate = bizDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME).replace("T"," ");
+        if ("5m".equals(period)){
+            return pdate.substring(0,16);
+        }
+        return pdate.substring(0,10);
     }
 
-    private void setJs(BarSeries series, GupiaoXinhao gupiaoXinhao, int i , ZJRCIndicator zjrc){
 
-        gupiaoXinhao.setSj1(new BigDecimal(zjrc.getValue(i).doubleValue()));
-        gupiaoXinhao.setSj2(new BigDecimal(zjrc.getValue(i-1).doubleValue()));
-        gupiaoXinhao.setSj3(new BigDecimal(zjrc.getValue(i-2).doubleValue()));
-        gupiaoXinhao.setSj4(new BigDecimal(zjrc.getValue(i-3).doubleValue()));
-        gupiaoXinhao.setSj5(new BigDecimal(zjrc.getValue(i-4).doubleValue()));
-
-        gupiaoXinhao.setBizDate2(formatterDate(series.getBar(i-1).getEndTime()));
-        gupiaoXinhao.setBizDate3(formatterDate(series.getBar(i-2).getEndTime()));
-        gupiaoXinhao.setBizDate4(formatterDate(series.getBar(i-3).getEndTime()));
-        gupiaoXinhao.setBizDate5(formatterDate(series.getBar(i-4).getEndTime()));
-
-        gupiaoXinhao.setPrice1(new BigDecimal(series.getBar(i).getLowPrice().doubleValue()));
-        gupiaoXinhao.setPrice2(new BigDecimal(series.getBar(i-1).getLowPrice().doubleValue()));
-        gupiaoXinhao.setPrice3(new BigDecimal(series.getBar(i-2).getLowPrice().doubleValue()));
-        gupiaoXinhao.setPrice4(new BigDecimal(series.getBar(i-3).getLowPrice().doubleValue()));
-        gupiaoXinhao.setPrice5(new BigDecimal(series.getBar(i-4).getLowPrice().doubleValue()));
-        gupiaoXinhaoRepository.save(gupiaoXinhao);
-    }
-    private void addZjrcIndicator(BarSeries series,String bondId){
+    public List<GupiaoXinhao> addZjrcIndicator(BarSeries series){
+        List<GupiaoXinhao> list = new ArrayList<>();
+        GupiaoXinhao gupiaoXinhao;
         ZJRCIndicator zjrc = new ZJRCIndicator(series);
-        int nbBars = series.getBarCount();
-        for (int i = 4; i < nbBars; i++) {
-            GupiaoXinhao gupiaoXinhao = new GupiaoXinhao();
-            gupiaoXinhao.setBizDate(formatterDate(series.getBar(i).getEndTime()));
-            gupiaoXinhao.setSymbol(bondId);
+        for (int i = 4; i < series.getBarCount(); i++) {
+            gupiaoXinhao = new GupiaoXinhao();
+
+            gupiaoXinhao.setSymbol(series.getName());
             gupiaoXinhao.setType(1);
             gupiaoXinhao.setTypeName("zjrc");
-            GupiaoXinhao gupiaoXinhao_1  = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDate(bondId,
-                    gupiaoXinhao.getTypeName(),gupiaoXinhao.getBizDate());
-            if (gupiaoXinhao_1 == null){
-                setJs(series, gupiaoXinhao, i, zjrc);
-                continue;
-            }
-            if (gupiaoXinhao.getBizDate().startsWith(DateTimeUtil.getBeforeDay(0))) { //如果是当天，请覆盖
-                gupiaoXinhao.setId(gupiaoXinhao_1.getId());
-                setJs(series, gupiaoXinhao, i, zjrc);
-                continue;
-            }
+            gupiaoXinhao.setPeriod(period);
+
+            gupiaoXinhao.setSj1(new BigDecimal(zjrc.getValue(i).doubleValue()));
+            gupiaoXinhao.setSj2(new BigDecimal(zjrc.getValue(i-1).doubleValue()));
+            gupiaoXinhao.setSj3(new BigDecimal(zjrc.getValue(i-2).doubleValue()));
+            gupiaoXinhao.setSj4(new BigDecimal(zjrc.getValue(i-3).doubleValue()));
+            gupiaoXinhao.setSj5(new BigDecimal(zjrc.getValue(i-4).doubleValue()));
+
+            gupiaoXinhao.setBizDate(formatterDate(series.getBar(i).getEndTime()));
+            gupiaoXinhao.setBizDate2(formatterDate(series.getBar(i-1).getEndTime()));
+            gupiaoXinhao.setBizDate3(formatterDate(series.getBar(i-2).getEndTime()));
+            gupiaoXinhao.setBizDate4(formatterDate(series.getBar(i-3).getEndTime()));
+            gupiaoXinhao.setBizDate5(formatterDate(series.getBar(i-4).getEndTime()));
+
+            gupiaoXinhao.setPrice1(new BigDecimal(series.getBar(i).getLowPrice().doubleValue()));
+            gupiaoXinhao.setPrice2(new BigDecimal(series.getBar(i-1).getLowPrice().doubleValue()));
+            gupiaoXinhao.setPrice3(new BigDecimal(series.getBar(i-2).getLowPrice().doubleValue()));
+            gupiaoXinhao.setPrice4(new BigDecimal(series.getBar(i-3).getLowPrice().doubleValue()));
+            gupiaoXinhao.setPrice5(new BigDecimal(series.getBar(i-4).getLowPrice().doubleValue()));
+
+            list.add(gupiaoXinhao);
         }
 
+        return list;
     }
 
     private void addJaxIndicator(BarSeries series,String bondId){
@@ -190,10 +198,10 @@ public class KzzStrategy {
     }
 
 
-    public void addIndicator(BarSeries series,String bondId){
+    public void addIndicator(BarSeries series){
 
 //        addMacdIndicator(series, bondId); //macd
-        addZjrcIndicator(series, bondId); //zjrc //资金入场
+//        addZjrcIndicator(series); //zjrc //资金入场
 //        addJaxIndicator(series, bondId); //jax //济安线
 //        addXlplIndicator(series, bondId); //xlpl //西拉派罗
 //        addMaIndicator(series, bondId); //ma //均线

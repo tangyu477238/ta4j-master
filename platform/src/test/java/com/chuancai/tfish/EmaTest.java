@@ -26,10 +26,6 @@ package com.chuancai.tfish;
 import com.chuancai.tfish.indicators.*;
 import com.chuancai.tfish.indicators.impl.ZJRCIndicatorImpl;
 import com.chuancai.tfish.model.Gupiao;
-import com.chuancai.tfish.model.GupiaoKline;
-import com.chuancai.tfish.model.GupiaoKline5m;
-import com.chuancai.tfish.model.GupiaoXinhao;
-import com.chuancai.tfish.repository.GupiaoKline5mRepository;
 import com.chuancai.tfish.repository.GupiaoKlineRepository;
 import com.chuancai.tfish.repository.GupiaoRepository;
 import com.chuancai.tfish.repository.GupiaoXinhaoRepository;
@@ -44,22 +40,12 @@ import org.ta4j.core.analysis.criteria.AverageProfitableTradesCriterion;
 import org.ta4j.core.analysis.criteria.RewardRiskRatioCriterion;
 import org.ta4j.core.analysis.criteria.TotalProfitCriterion;
 import org.ta4j.core.analysis.criteria.VersusBuyAndHoldCriterion;
-import org.ta4j.core.indicators.EMAIndicator;
-import org.ta4j.core.indicators.MACDIndicator;
 import org.ta4j.core.indicators.SMAIndicator;
-import org.ta4j.core.indicators.StochasticOscillatorKIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.indicators.helpers.OpenPriceIndicator;
-import org.ta4j.core.num.Num;
 import org.ta4j.core.trading.rules.*;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -72,8 +58,6 @@ import java.util.List;
 @Slf4j
 public class EmaTest {
 
-    @Resource
-    private GupiaoKline5mRepository gupiaoKline5mRepository;
 
     @Resource
     private GupiaoRepository gupiaoRepository;

@@ -22,6 +22,10 @@ public class GupiaoXinhao implements Serializable {
     @Column(length = 50)
     private String symbol;
 
+    @JsonProperty("period")
+    @Column(length = 50)
+    private String period;
+
     @JsonProperty("name")
     @Column(length = 50)
     private String name;
