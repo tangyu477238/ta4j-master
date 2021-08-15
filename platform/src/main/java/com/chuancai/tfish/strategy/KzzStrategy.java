@@ -8,7 +8,9 @@ import com.chuancai.tfish.model.GupiaoKline;
 import com.chuancai.tfish.model.GupiaoXinhao;
 import com.chuancai.tfish.repository.GupiaoKlineRepository;
 import com.chuancai.tfish.repository.GupiaoXinhaoRepository;
+import com.chuancai.tfish.util.ComUtil;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.BaseBarSeriesBuilder;
@@ -27,9 +29,10 @@ import java.util.List;
 
 @Service
 @Data
+@Slf4j
 public class KzzStrategy {
 
-    private String period;
+    private Integer period;
 
     @Resource
     private GupiaoXinhaoRepository gupiaoXinhaoRepository;
@@ -40,9 +43,9 @@ public class KzzStrategy {
 
     public BarSeries getBarSeries(String bondId){
         List<GupiaoKline> gupiaoKline = null;
-        if ("5m".equals(period)){
+        if (period==5){
             gupiaoKline = gupiaoKlineRepository.getKline5m(bondId);
-        } else if ("day".equals(period)){
+        } else if (period==101){
             gupiaoKline = gupiaoKlineRepository.getKline(bondId);
         }
         if (gupiaoKline.isEmpty()) return null;
@@ -54,6 +57,7 @@ public class KzzStrategy {
 //          +"--"+kline.getLow()+"--"+ kline.getClose()+"--"+kline.getVolume());
             ZonedDateTime date = ZonedDateTime.parse(kline.getTimestamp() + " PST",
                     DateTimeFormatter.ofPattern("yyyy-MM-dd H:m:s.S z"));
+//            log.info(date.toString());
             series.addBar(date, new BigDecimal(kline.getOpen()), new BigDecimal(kline.getHigh()),
                     new BigDecimal(kline.getLow()), new BigDecimal(kline.getClose()), new BigDecimal(kline.getVolume()));
         });
@@ -106,6 +110,9 @@ public class KzzStrategy {
 
     public List<GupiaoXinhao> addZjrcIndicator(BarSeries series){
         List<GupiaoXinhao> list = new ArrayList<>();
+        if (ComUtil.isEmpty(series)){
+            return list;
+        }
         GupiaoXinhao gupiaoXinhao;
         ZJRCIndicator zjrc = new ZJRCIndicator(series);
         for (int i = 4; i < series.getBarCount(); i++) {
@@ -114,7 +121,7 @@ public class KzzStrategy {
             gupiaoXinhao.setSymbol(series.getName());
             gupiaoXinhao.setType(1);
             gupiaoXinhao.setTypeName("zjrc");
-            gupiaoXinhao.setPeriod(period);
+            gupiaoXinhao.setPeriod(period.toString());
 
             gupiaoXinhao.setSj1(new BigDecimal(zjrc.getValue(i).doubleValue()));
             gupiaoXinhao.setSj2(new BigDecimal(zjrc.getValue(i-1).doubleValue()));

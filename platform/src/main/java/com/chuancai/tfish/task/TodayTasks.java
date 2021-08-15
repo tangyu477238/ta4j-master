@@ -59,11 +59,13 @@ public class TodayTasks {
         List<Gupiao> list = gupiaoRepository.getSymbolTop();
         for (Gupiao gupiao : list){
             try {
-                kzzStrategy.setPeriod("5m"); //按天
+                kzzStrategy.setPeriod(5); //
                 BarSeries series = kzzStrategy.getBarSeries(gupiao.getSymbol()); //获取k数据
                 List<GupiaoXinhao> listXinhao = kzzStrategy.addZjrcIndicator(series); //数据
                 gupiaoXinhaoManager.saveGupiaoXinhao(listXinhao);
-            }catch (Exception e){}
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
     }
@@ -87,11 +89,13 @@ public class TodayTasks {
         List<Gupiao> list = gupiaoRepository.getSymbolTop();
         for (Gupiao gupiao : list){
             try {
-                kzzStrategy.setPeriod("day"); //按天
+                kzzStrategy.setPeriod(101); //按天
                 BarSeries series = kzzStrategy.getBarSeries(gupiao.getSymbol()); //获取k数据
                 List<GupiaoXinhao> listXinhao = kzzStrategy.addZjrcIndicator(series); //数据
                 gupiaoXinhaoManager.saveGupiaoXinhao(listXinhao);
-            }catch (Exception e){}
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
     }
