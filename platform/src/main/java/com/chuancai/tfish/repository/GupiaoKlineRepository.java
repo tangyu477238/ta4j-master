@@ -18,6 +18,10 @@ public interface GupiaoKlineRepository extends JpaRepository<GupiaoKline,Integer
     @Query(value = "select * from gupiao_kline_5m where symbol = ?1  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
     List<GupiaoKline> getKline5m(String bondId);
 
+    @Query(value = "select * from gupiao_kline_30m where symbol = ?1  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
+    List<GupiaoKline> getKline30m(String bondId);
+
+
     @Query(value = "select * from gupiao_kline where symbol = ?1 order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
     List<GupiaoKline> getKline(String bondId);
 

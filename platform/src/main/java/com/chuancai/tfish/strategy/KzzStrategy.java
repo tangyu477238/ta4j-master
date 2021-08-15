@@ -45,6 +45,8 @@ public class KzzStrategy {
         List<GupiaoKline> gupiaoKline = null;
         if (period==5){
             gupiaoKline = gupiaoKlineRepository.getKline5m(bondId);
+        } else if (period==30){
+            gupiaoKline = gupiaoKlineRepository.getKline30m(bondId);
         } else if (period==101){
             gupiaoKline = gupiaoKlineRepository.getKline(bondId);
         }
@@ -101,10 +103,14 @@ public class KzzStrategy {
 
     private String formatterDate(ZonedDateTime bizDate){
         String pdate = bizDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME).replace("T"," ");
-        if ("5m".equals(period)){
+        if (period==5){
             return pdate.substring(0,16);
+        } else if (period==30){
+            return pdate.substring(0,16);
+        } else if (period==101){
+            return pdate.substring(0,10);
         }
-        return pdate.substring(0,10);
+        return null;
     }
 
 

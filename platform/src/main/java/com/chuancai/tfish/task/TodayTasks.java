@@ -47,34 +47,38 @@ public class TodayTasks {
 
 
 
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     /***
      *  5分钟级别
      * 30秒同步一次
      */
-    @Scheduled(cron = "${task.today.xinhao.5fen}")
-    public void todayKzzBy5Fen() {
+    @Scheduled(cron = "${task.today.xinhao.5m}")
+    public void todayKzzBy5m() {
         if ("0".equals(consumerOff)) return;
         Date current = new Date();
-        log.info(MessageFormat.format("todayKzzBy5Fen，Date：{0}",FORMAT.format(current)));
-        List<Gupiao> list = gupiaoRepository.getSymbolTop();
-        for (Gupiao gupiao : list){
-            try {
-                kzzStrategy.setPeriod(5); //
-                BarSeries series = kzzStrategy.getBarSeries(gupiao.getSymbol()); //获取k数据
-                List<GupiaoXinhao> listXinhao = kzzStrategy.addZjrcIndicator(series); //数据
-                gupiaoXinhaoManager.saveGupiaoXinhao(listXinhao);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
+        log.info(MessageFormat.format("todayKzzBy5m，Date：{0}",FORMAT.format(current)));
+        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(5);
 
     }
 
 
+    /***
+     *  30分钟级别
+     * 2分 同步一次
+     */
+    @Scheduled(cron = "${task.today.xinhao.30m}")
+    public void todayKzzBy30m() {
+        if ("0".equals(consumerOff)) return;
+        Date current = new Date();
+        log.info(MessageFormat.format("todayKzzBy30m，Date：{0}",FORMAT.format(current)));
+        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(30);
 
+    }
 
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     /***
@@ -86,17 +90,7 @@ public class TodayTasks {
         if ("0".equals(consumerOff)) return;
         Date current = new Date();
         log.info(MessageFormat.format("todayKzzByDay，Date：{0}",FORMAT.format(current)));
-        List<Gupiao> list = gupiaoRepository.getSymbolTop();
-        for (Gupiao gupiao : list){
-            try {
-                kzzStrategy.setPeriod(101); //按天
-                BarSeries series = kzzStrategy.getBarSeries(gupiao.getSymbol()); //获取k数据
-                List<GupiaoXinhao> listXinhao = kzzStrategy.addZjrcIndicator(series); //数据
-                gupiaoXinhaoManager.saveGupiaoXinhao(listXinhao);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
+        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(101);
 
     }
 

@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface GupiaoXinhaoManager {
     void saveGupiaoXinhao(List<GupiaoXinhao> list);
+
+    void sysnGupiaoXinhaoAll(Integer period);
 }
