@@ -78,9 +78,8 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         }
         @Override
         public void run(){
-            kzzStrategy.setPeriod(period);
-            BarSeries series = kzzStrategy.getBarSeries(gupiao.getSymbol()); //获取k数据
-            List<GupiaoXinhao> listXinhao = kzzStrategy.addZjrcIndicator(series); //数据
+            BarSeries series = kzzStrategy.getBarSeries(gupiao.getSymbol(), period); //获取k数据
+            List<GupiaoXinhao> listXinhao = kzzStrategy.addZjrcIndicator(series, period); //数据
             saveGupiaoXinhao(listXinhao);
         }
     }

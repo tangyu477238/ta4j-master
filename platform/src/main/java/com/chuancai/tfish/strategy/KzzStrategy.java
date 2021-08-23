@@ -32,8 +32,6 @@ import java.util.List;
 @Slf4j
 public class KzzStrategy {
 
-    private Integer period;
-
     @Resource
     private GupiaoXinhaoRepository gupiaoXinhaoRepository;
 
@@ -41,7 +39,7 @@ public class KzzStrategy {
     private GupiaoKlineRepository gupiaoKlineRepository;
 
 
-    public BarSeries getBarSeries(String bondId){
+    public BarSeries getBarSeries(String bondId, Integer period){
         List<GupiaoKline> gupiaoKline = null;
         if (period==5){
             gupiaoKline = gupiaoKlineRepository.getKline5m(bondId);
@@ -101,7 +99,7 @@ public class KzzStrategy {
 
     }
 
-    private String formatterDate(ZonedDateTime bizDate){
+    private String formatterDate(ZonedDateTime bizDate, Integer period){
         String pdate = bizDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME).replace("T"," ");
         if (period==5){
             return pdate.substring(0,16);
@@ -114,7 +112,7 @@ public class KzzStrategy {
     }
 
 
-    public List<GupiaoXinhao> addZjrcIndicator(BarSeries series){
+    public List<GupiaoXinhao> addZjrcIndicator(BarSeries series, Integer period){
         List<GupiaoXinhao> list = new ArrayList<>();
         if (ComUtil.isEmpty(series)){
             return list;
@@ -135,11 +133,11 @@ public class KzzStrategy {
             gupiaoXinhao.setSj4(new BigDecimal(zjrc.getValue(i-3).doubleValue()));
             gupiaoXinhao.setSj5(new BigDecimal(zjrc.getValue(i-4).doubleValue()));
 
-            gupiaoXinhao.setBizDate(formatterDate(series.getBar(i).getEndTime()));
-            gupiaoXinhao.setBizDate2(formatterDate(series.getBar(i-1).getEndTime()));
-            gupiaoXinhao.setBizDate3(formatterDate(series.getBar(i-2).getEndTime()));
-            gupiaoXinhao.setBizDate4(formatterDate(series.getBar(i-3).getEndTime()));
-            gupiaoXinhao.setBizDate5(formatterDate(series.getBar(i-4).getEndTime()));
+            gupiaoXinhao.setBizDate(formatterDate(series.getBar(i).getEndTime(), period));
+            gupiaoXinhao.setBizDate2(formatterDate(series.getBar(i-1).getEndTime(), period));
+            gupiaoXinhao.setBizDate3(formatterDate(series.getBar(i-2).getEndTime(), period));
+            gupiaoXinhao.setBizDate4(formatterDate(series.getBar(i-3).getEndTime(), period));
+            gupiaoXinhao.setBizDate5(formatterDate(series.getBar(i-4).getEndTime(), period));
 
             gupiaoXinhao.setPrice1(new BigDecimal(series.getBar(i).getLowPrice().doubleValue()));
             gupiaoXinhao.setPrice2(new BigDecimal(series.getBar(i-1).getLowPrice().doubleValue()));

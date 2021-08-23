@@ -79,9 +79,9 @@ public class TodayTasksTest {
     public void getData() {
 
         String bondId = "123102";
-        kzzStrategy.setPeriod(5); //按天
-        BarSeries series = kzzStrategy.getBarSeries(bondId); //获取k数据
-        List<GupiaoXinhao> listXinhao = kzzStrategy.addZjrcIndicator(series); //数据
+        Integer period = 5; //按天
+        BarSeries series = kzzStrategy.getBarSeries(bondId,period); //获取k数据
+        List<GupiaoXinhao> listXinhao = kzzStrategy.addZjrcIndicator(series,period); //数据
         gupiaoXinhaoManager.saveGupiaoXinhao(listXinhao);
 
 
