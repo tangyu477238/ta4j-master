@@ -119,7 +119,7 @@ public class KzzStrategy {
         }
         GupiaoXinhao gupiaoXinhao;
         ZJRCIndicator zjrc = new ZJRCIndicator(series);
-        for (int i = 4; i < series.getBarCount(); i++) {
+        for (int i = 9; i < series.getBarCount(); i++) {
             gupiaoXinhao = new GupiaoXinhao();
 
             gupiaoXinhao.setSymbol(series.getName());
@@ -132,18 +132,33 @@ public class KzzStrategy {
             gupiaoXinhao.setSj3(new BigDecimal(zjrc.getValue(i-2).doubleValue()));
             gupiaoXinhao.setSj4(new BigDecimal(zjrc.getValue(i-3).doubleValue()));
             gupiaoXinhao.setSj5(new BigDecimal(zjrc.getValue(i-4).doubleValue()));
+            gupiaoXinhao.setSj6(new BigDecimal(zjrc.getValue(i-5).doubleValue()));
+            gupiaoXinhao.setSj7(new BigDecimal(zjrc.getValue(i-6).doubleValue()));
+            gupiaoXinhao.setSj8(new BigDecimal(zjrc.getValue(i-7).doubleValue()));
+            gupiaoXinhao.setSj9(new BigDecimal(zjrc.getValue(i-8).doubleValue()));
+            gupiaoXinhao.setSj10(new BigDecimal(zjrc.getValue(i-9).doubleValue()));
 
             gupiaoXinhao.setBizDate(formatterDate(series.getBar(i).getEndTime(), period));
             gupiaoXinhao.setBizDate2(formatterDate(series.getBar(i-1).getEndTime(), period));
             gupiaoXinhao.setBizDate3(formatterDate(series.getBar(i-2).getEndTime(), period));
             gupiaoXinhao.setBizDate4(formatterDate(series.getBar(i-3).getEndTime(), period));
             gupiaoXinhao.setBizDate5(formatterDate(series.getBar(i-4).getEndTime(), period));
+            gupiaoXinhao.setBizDate6(formatterDate(series.getBar(i-5).getEndTime(), period));
+            gupiaoXinhao.setBizDate7(formatterDate(series.getBar(i-6).getEndTime(), period));
+            gupiaoXinhao.setBizDate8(formatterDate(series.getBar(i-7).getEndTime(), period));
+            gupiaoXinhao.setBizDate9(formatterDate(series.getBar(i-8).getEndTime(), period));
+            gupiaoXinhao.setBizDate10(formatterDate(series.getBar(i-9).getEndTime(), period));
 
             gupiaoXinhao.setPrice1(new BigDecimal(series.getBar(i).getLowPrice().doubleValue()));
             gupiaoXinhao.setPrice2(new BigDecimal(series.getBar(i-1).getLowPrice().doubleValue()));
             gupiaoXinhao.setPrice3(new BigDecimal(series.getBar(i-2).getLowPrice().doubleValue()));
             gupiaoXinhao.setPrice4(new BigDecimal(series.getBar(i-3).getLowPrice().doubleValue()));
             gupiaoXinhao.setPrice5(new BigDecimal(series.getBar(i-4).getLowPrice().doubleValue()));
+            gupiaoXinhao.setPrice6(new BigDecimal(series.getBar(i-5).getLowPrice().doubleValue()));
+            gupiaoXinhao.setPrice7(new BigDecimal(series.getBar(i-6).getLowPrice().doubleValue()));
+            gupiaoXinhao.setPrice8(new BigDecimal(series.getBar(i-7).getLowPrice().doubleValue()));
+            gupiaoXinhao.setPrice9(new BigDecimal(series.getBar(i-8).getLowPrice().doubleValue()));
+            gupiaoXinhao.setPrice10(new BigDecimal(series.getBar(i-9).getLowPrice().doubleValue()));
 
             list.add(gupiaoXinhao);
         }
