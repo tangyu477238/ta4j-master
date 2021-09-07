@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.ta4j.core.BarSeries;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -108,5 +109,16 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 log.info("-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
             }
         }
+    }
+
+
+
+
+
+    public boolean isUp(BigDecimal hPrice, BigDecimal lPrice, BigDecimal nhPrice,BigDecimal nlPrice){
+        if (nhPrice.compareTo(hPrice) > 0 && nlPrice.compareTo(lPrice) > 0 ){ //大于最高，大于最低
+            return true;
+        }
+        return false;
     }
 }
