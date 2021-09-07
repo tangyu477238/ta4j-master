@@ -104,7 +104,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             }
             List<GupiaoXinhao> listXinhao = kzzStrategy.addZjrcIndicator(series, period); //数据
             saveGupiaoXinhao(listXinhao);
-            log.info("--------数-----"+DateTimeUtil.getSecondsOfTwoDate(date1,new Date())+"");
+            if (period==30) {
+                log.info("-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
+            }
         }
     }
 }
