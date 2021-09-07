@@ -48,7 +48,9 @@ public class KzzStrategy {
         } else if (period==101){
             gupiaoKline = gupiaoKlineRepository.getKline(bondId);
         }
-        if (gupiaoKline.isEmpty()) return null;
+        if (gupiaoKline.isEmpty()){
+            return null;
+        }
         // 反转lists
         Collections.reverse(gupiaoKline);
         BarSeries series = new BaseBarSeriesBuilder().withName(bondId).build();

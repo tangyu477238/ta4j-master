@@ -1,6 +1,7 @@
 package com.chuancai.tfish.util;
 
 
+import java.sql.SQLOutput;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -51,6 +52,7 @@ public class ExecutorServiceFactory {
      * @return
      */
     public ExecutorService createFixedThreadPool(int count) {
+        System.out.println("createFixedThreadPool:"+count);
         ExecutorService executorService = Executors.newFixedThreadPool(count, getThreadFactory("fixed"));
         return executorService;
     }
