@@ -142,6 +142,29 @@ public class GupiaoXinhao implements Serializable {
     @Column(precision = 20, scale = 3)
     private BigDecimal price10;
 
+    @Column(length = 1)
+    private Integer trend;//趋势(1上升0下降)
 
+    @Column(precision = 20, scale = 3)
+    private BigDecimal up_price1;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal up_price2;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal up_price3;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal up_price4;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal up_price5;
+
+    @Column(precision = 20, scale = 3)
+    private BigDecimal down_price1;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal down_price2;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal down_price3;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal down_price4;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal down_price5;
 
 }

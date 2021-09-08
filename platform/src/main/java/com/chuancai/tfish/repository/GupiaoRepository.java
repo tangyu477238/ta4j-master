@@ -12,5 +12,5 @@ public interface GupiaoRepository extends JpaRepository<Gupiao,Integer> {
     Gupiao findBySymbol(String bondId);
 
     @Query(value = "select * from gupiao where symbol like '11%' or  symbol like '12%' ", nativeQuery = true)
-    List<Gupiao> getSymbolTop();
+    List<Gupiao> listKzz();
 }
