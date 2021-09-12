@@ -100,7 +100,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
             Collections.reverse(listKline); // 反转lists
             BarSeries series = kzzStrategy.getBarSeries(listKline);  //初始化数据
-            saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据
+//            saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据
             if (period==30) {
                 log.info("-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
             }
@@ -129,6 +129,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             }
             GupiaoKline previousGupiaoKline = listKline.get(i-1);
             GupiaoKline gupiaoKline = listKline.get(i);
+            log.info(i+"------------");
             if (isUpTrend(previousGupiaoKline, gupiaoKline)){
                 gupiaoKline.setTrend(1);
                 if (previousGupiaoKline.getTrend()==0){
@@ -215,6 +216,8 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
      * @return
      */
     private boolean isUpTrend(GupiaoKline previousGupiaoKline, GupiaoKline gupiaoKline){
+        log.info(gupiaoKline.getHigh()+"------------"+previousGupiaoKline.getNewHigh());
+        log.info(gupiaoKline.getLow()+"------------"+previousGupiaoKline.getNewLow());
         if ((gupiaoKline.getHigh().compareTo(previousGupiaoKline.getNewHigh()) > 0 //今天最高大于昨天最高
                 && gupiaoKline.getLow().compareTo(previousGupiaoKline.getNewLow()) >= 0)){ //今天最低大于等于昨天最低
             gupiaoKline.setNewHigh(gupiaoKline.getHigh());
