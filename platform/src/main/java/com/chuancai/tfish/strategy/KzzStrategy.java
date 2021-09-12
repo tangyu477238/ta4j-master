@@ -39,30 +39,27 @@ public class KzzStrategy {
     private GupiaoKlineRepository gupiaoKlineRepository;
 
 
-    public BarSeries getBarSeries(String bondId, Integer period){
-        List<GupiaoKline> gupiaoKline = null;
+    public List<GupiaoKline> listKine(String bondId, Integer period){
+        List<GupiaoKline> listKline = null;
         if (period==5){
-            gupiaoKline = gupiaoKlineRepository.getKline5m(bondId);
+            listKline = gupiaoKlineRepository.getKline5m(bondId);
         } else if (period==30){
-            gupiaoKline = gupiaoKlineRepository.getKline30m(bondId);
+            listKline = gupiaoKlineRepository.getKline30m(bondId);
         } else if (period==101){
-            gupiaoKline = gupiaoKlineRepository.getKline(bondId);
+            listKline = gupiaoKlineRepository.getKline(bondId);
         }
-        if (gupiaoKline.isEmpty()){
-            return null;
-        }
-        // 反转lists
-        Collections.reverse(gupiaoKline);
-        BarSeries series = new BaseBarSeriesBuilder().withName(bondId).build();
-        gupiaoKline.forEach(kline ->{
+        return listKline;
+    }
+
+    public BarSeries getBarSeries(List<GupiaoKline> listKline){
+        BarSeries series = new BaseBarSeriesBuilder().withName(listKline.get(0).getSymbol()).build();
+        for(GupiaoKline kline : listKline){
 //          log.info(kline.getTimestamp()+"--"+kline.getOpen()+"--"+kline.getHigh()
 //          +"--"+kline.getLow()+"--"+ kline.getClose()+"--"+kline.getVolume());
-            ZonedDateTime date = ZonedDateTime.parse(kline.getTimestamp() + " PST",
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd H:m:s.S z"));
+            ZonedDateTime date = ZonedDateTime.parse(kline.getTimestamp() + " PST", DateTimeFormatter.ofPattern("yyyy-MM-dd H:m:s.S z"));
 //            log.info(date.toString());
-            series.addBar(date, new BigDecimal(kline.getOpen()), new BigDecimal(kline.getHigh()),
-                    new BigDecimal(kline.getLow()), new BigDecimal(kline.getClose()), new BigDecimal(kline.getVolume()));
-        });
+            series.addBar(date, kline.getOpen(), kline.getHigh(), kline.getLow(), kline.getClose(), kline.getVolume(), kline.getAmount());
+        }
         return series;
     }
 
@@ -113,45 +110,68 @@ public class KzzStrategy {
         return null;
     }
 
+    private BigDecimal getValue(ZJRCIndicator zjrc, Integer index){
+        if (index<0){
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(zjrc.getValue(index).doubleValue());
+    }
 
-    public List<GupiaoXinhao> addZjrcIndicator(BarSeries series, Integer period){
+    private String getBizDate(List<GupiaoKline> listKline, Integer index){
+        if (index<0){
+            return null;
+        }
+        return listKline.get(index).getBizDate();
+    }
+
+    private BigDecimal getLowPrice(List<GupiaoKline> listKline, Integer index){
+        if (index<0){
+            return new BigDecimal(0);
+        }
+        return listKline.get(index).getLow();
+    }
+
+    public List<GupiaoXinhao> addZjrcIndicator(BarSeries series, List<GupiaoKline> listKline){
         List<GupiaoXinhao> list = new ArrayList<>();
         if (ComUtil.isEmpty(series)){
             return list;
         }
         GupiaoXinhao gupiaoXinhao;
         ZJRCIndicator zjrc = new ZJRCIndicator(series);
-        for (int i = 4; i < series.getBarCount(); i++) {
+        for (int i = 0; i < series.getBarCount(); i++) {
             gupiaoXinhao = new GupiaoXinhao();
 
             gupiaoXinhao.setSymbol(series.getName());
             gupiaoXinhao.setType(1);
             gupiaoXinhao.setTypeName("zjrc");
-            gupiaoXinhao.setPeriod(period.toString());
+            gupiaoXinhao.setPeriod(listKline.get(i).getPeriod());
 
-            gupiaoXinhao.setSj1(new BigDecimal(zjrc.getValue(i).doubleValue()));
-            gupiaoXinhao.setSj2(new BigDecimal(zjrc.getValue(i-1).doubleValue()));
-            gupiaoXinhao.setSj3(new BigDecimal(zjrc.getValue(i-2).doubleValue()));
-            gupiaoXinhao.setSj4(new BigDecimal(zjrc.getValue(i-3).doubleValue()));
-            gupiaoXinhao.setSj5(new BigDecimal(zjrc.getValue(i-4).doubleValue()));
+            gupiaoXinhao.setSj1(getValue(zjrc, i));
+            gupiaoXinhao.setSj2(getValue(zjrc, i-1));
+            gupiaoXinhao.setSj3(getValue(zjrc, i-2));
+            gupiaoXinhao.setSj4(getValue(zjrc, i-3));
+            gupiaoXinhao.setSj5(getValue(zjrc, i-4));
 
-            gupiaoXinhao.setBizDate(formatterDate(series.getBar(i).getEndTime(), period));
-            gupiaoXinhao.setBizDate2(formatterDate(series.getBar(i-1).getEndTime(), period));
-            gupiaoXinhao.setBizDate3(formatterDate(series.getBar(i-2).getEndTime(), period));
-            gupiaoXinhao.setBizDate4(formatterDate(series.getBar(i-3).getEndTime(), period));
-            gupiaoXinhao.setBizDate5(formatterDate(series.getBar(i-4).getEndTime(), period));
+            gupiaoXinhao.setBizDate(getBizDate(listKline, i));
+            gupiaoXinhao.setBizDate2(getBizDate(listKline, i-1));
+            gupiaoXinhao.setBizDate3(getBizDate(listKline, i-2));
+            gupiaoXinhao.setBizDate4(getBizDate(listKline, i-3));
+            gupiaoXinhao.setBizDate5(getBizDate(listKline, i-4));
 
-            gupiaoXinhao.setPrice1(new BigDecimal(series.getBar(i).getLowPrice().doubleValue()));
-            gupiaoXinhao.setPrice2(new BigDecimal(series.getBar(i-1).getLowPrice().doubleValue()));
-            gupiaoXinhao.setPrice3(new BigDecimal(series.getBar(i-2).getLowPrice().doubleValue()));
-            gupiaoXinhao.setPrice4(new BigDecimal(series.getBar(i-3).getLowPrice().doubleValue()));
-            gupiaoXinhao.setPrice5(new BigDecimal(series.getBar(i-4).getLowPrice().doubleValue()));
+            gupiaoXinhao.setPrice1(getLowPrice(listKline, i));
+            gupiaoXinhao.setPrice2(getLowPrice(listKline, i-1));
+            gupiaoXinhao.setPrice3(getLowPrice(listKline, i-2));
+            gupiaoXinhao.setPrice4(getLowPrice(listKline, i-3));
+            gupiaoXinhao.setPrice5(getLowPrice(listKline, i-4));
 
             list.add(gupiaoXinhao);
         }
 
         return list;
     }
+
+
+
 
     private void addJaxIndicator(BarSeries series,String bondId){
         JAXIndicator jax = new JAXIndicator(series);
