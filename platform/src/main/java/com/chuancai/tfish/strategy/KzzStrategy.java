@@ -98,17 +98,17 @@ public class KzzStrategy {
 
     }
 
-    private String formatterDate(ZonedDateTime bizDate, Integer period){
-        String pdate = bizDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME).replace("T"," ");
-        if (period==5){
-            return pdate.substring(0,16);
-        } else if (period==30){
-            return pdate.substring(0,16);
-        } else if (period==101){
-            return pdate.substring(0,10);
-        }
-        return null;
-    }
+//    private String formatterDate(ZonedDateTime bizDate, Integer period){
+//        String pdate = bizDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME).replace("T"," ");
+//        if (period==5){
+//            return pdate.substring(0,16);
+//        } else if (period==30){
+//            return pdate.substring(0,16);
+//        } else if (period==101){
+//            return pdate.substring(0,10);
+//        }
+//        return null;
+//    }
 
     private BigDecimal getValue(ZJRCIndicator zjrc, Integer index){
         if (index<0){
@@ -151,19 +151,34 @@ public class KzzStrategy {
             gupiaoXinhao.setSj3(getValue(zjrc, i-2));
             gupiaoXinhao.setSj4(getValue(zjrc, i-3));
             gupiaoXinhao.setSj5(getValue(zjrc, i-4));
+            gupiaoXinhao.setSj6(getValue(zjrc, i-5));
+            gupiaoXinhao.setSj7(getValue(zjrc, i-6));
+            gupiaoXinhao.setSj8(getValue(zjrc, i-7));
+            gupiaoXinhao.setSj9(getValue(zjrc, i-8));
+            gupiaoXinhao.setSj10(getValue(zjrc, i-9));
+
 
             gupiaoXinhao.setBizDate(getBizDate(listKline, i));
             gupiaoXinhao.setBizDate2(getBizDate(listKline, i-1));
             gupiaoXinhao.setBizDate3(getBizDate(listKline, i-2));
             gupiaoXinhao.setBizDate4(getBizDate(listKline, i-3));
             gupiaoXinhao.setBizDate5(getBizDate(listKline, i-4));
+            gupiaoXinhao.setBizDate6(getBizDate(listKline, i-5));
+            gupiaoXinhao.setBizDate7(getBizDate(listKline, i-6));
+            gupiaoXinhao.setBizDate8(getBizDate(listKline, i-7));
+            gupiaoXinhao.setBizDate9(getBizDate(listKline, i-8));
+            gupiaoXinhao.setBizDate10(getBizDate(listKline, i-9));
 
             gupiaoXinhao.setPrice1(getLowPrice(listKline, i));
             gupiaoXinhao.setPrice2(getLowPrice(listKline, i-1));
             gupiaoXinhao.setPrice3(getLowPrice(listKline, i-2));
             gupiaoXinhao.setPrice4(getLowPrice(listKline, i-3));
             gupiaoXinhao.setPrice5(getLowPrice(listKline, i-4));
-
+            gupiaoXinhao.setPrice6(getLowPrice(listKline, i-5));
+            gupiaoXinhao.setPrice7(getLowPrice(listKline, i-6));
+            gupiaoXinhao.setPrice8(getLowPrice(listKline, i-7));
+            gupiaoXinhao.setPrice9(getLowPrice(listKline, i-8));
+            gupiaoXinhao.setPrice10(getLowPrice(listKline, i-9));
             list.add(gupiaoXinhao);
         }
 
