@@ -274,9 +274,4 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         return false;
     }
 
-    public TrendDTO isUp(List<GupiaoKline> listKline, Integer index){
-
-        TrendDTO trendDTO = new TrendDTO();
-        return trendDTO;
-    }
 }
