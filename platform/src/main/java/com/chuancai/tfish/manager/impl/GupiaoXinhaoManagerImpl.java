@@ -67,7 +67,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
 
 
-    @Synchronized
+
     @Override
     public void sysnGupiaoXinhaoAll(Integer period) {
         List<Gupiao> list = gupiaoRepository.listKzz();
@@ -96,7 +96,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             if (ComUtil.isEmpty(listKline)){
                 return;
             }
-            log.info(period+"-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+gupiao.getSymbol());
+//            log.info(period+"-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+gupiao.getSymbol());
             GupiaoXinhao gupiaoXinhao = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(gupiao.getSymbol(),
                     "zjrc", listKline.get(0).getBizDate(), period); //验证是否已处理
             if (!ComUtil.isEmpty(gupiaoXinhao)){
@@ -106,16 +106,16 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             Collections.reverse(listKline); // 反转lists
             BarSeries series = kzzStrategy.getBarSeries(listKline);  //初始化数据
             saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据
-            if (period==30) {
-                log.info("-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
-            }
+            log.info("-------数据处理时长--a---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
             //存储，趋势计算
-            saveKline(listTrendKline(listKline));
-
+            List<GupiaoKline> tlist = listTrendKline(listKline);
+            log.info("-------数据处理时长--b---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
+            saveKline(tlist);
+            log.info("-------数据处理时长--c---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
         }
     }
 
-    @Synchronized
+
     private List<GupiaoKline>  listTrendKline(List<GupiaoKline> listKline){
         for (int i = 0; i < listKline.size(); i++) {
             if (i==0){
@@ -187,8 +187,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
     }
 
 
-    @Synchronized
+
     private void saveKline(List<GupiaoKline> listKline){
+        Date date1 = new Date();
         if (ComUtil.isEmpty(listKline)){
             return;
         }
@@ -209,6 +210,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         } else if (listKline.get(0).getPeriod()==KlineEnum.K_1D.getId()){
             gupiaoKlineRepository.saveAll(listKline); //保存新增数据
         }
+        log.info("-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
     }
 
     /****
@@ -217,10 +219,8 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
      * @param gupiaoKline
      * @return
      */
-    @Synchronized
+
     private boolean isUpTrend(GupiaoKline previousGupiaoKline, GupiaoKline gupiaoKline){
-//        log.info(gupiaoKline.getHigh()+"------------"+previousGupiaoKline.getNewHigh());
-//        log.info(gupiaoKline.getLow()+"------------"+previousGupiaoKline.getNewLow());
         if ((gupiaoKline.getHigh().compareTo(previousGupiaoKline.getNewHigh()) > 0 //今天最高大于昨天最高
                 && gupiaoKline.getLow().compareTo(previousGupiaoKline.getNewLow()) >= 0)){ //今天最低大于等于昨天最低
             gupiaoKline.setNewHigh(gupiaoKline.getHigh());
@@ -277,19 +277,10 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             return false;
         }
 
-        log.info(gupiaoKline.getHigh().compareTo(previousGupiaoKline.getNewHigh())+"---------"+gupiaoKline.getLow().compareTo(previousGupiaoKline.getNewLow()));
-        if ((gupiaoKline.getHigh().compareTo(previousGupiaoKline.getNewHigh()) == 0 //今天最高等于昨天最高
-                && gupiaoKline.getLow().compareTo(previousGupiaoKline.getNewLow()) == 0)) { //今天最低等于昨天最低
-            gupiaoKline.setNewHigh(gupiaoKline.getHigh());
-            gupiaoKline.setNewLow(gupiaoKline.getLow());
-            if (previousGupiaoKline.getTrend()==1) {
-                return true;
-            }
-            return false;
-        }
-
-        if (gupiaoKline.getNewHigh()==null){
-            log.info("-----------------------");
+        gupiaoKline.setNewHigh(gupiaoKline.getHigh());
+        gupiaoKline.setNewLow(gupiaoKline.getLow());
+        if (previousGupiaoKline.getTrend()==1) {
+            return true;
         }
         return false;
     }
