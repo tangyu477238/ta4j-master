@@ -96,7 +96,6 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             if (ComUtil.isEmpty(listKline)){
                 return;
             }
-//            log.info(period+"-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+gupiao.getSymbol());
             GupiaoXinhao gupiaoXinhao = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(gupiao.getSymbol(),
                     "zjrc", listKline.get(0).getBizDate(), period); //验证是否已处理
             if (!ComUtil.isEmpty(gupiaoXinhao)){
@@ -106,12 +105,12 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             Collections.reverse(listKline); // 反转lists
             BarSeries series = kzzStrategy.getBarSeries(listKline);  //初始化数据
             saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据
-            log.info("-------数据处理时长--a---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
+//            log.info("-------数据处理时长--a---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
             //存储，趋势计算
             List<GupiaoKline> tlist = listTrendKline(listKline);
-            log.info("-------数据处理时长--b---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
+//            log.info("-------数据处理时长--b---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
             saveKline(tlist);
-            log.info("-------数据处理时长--c---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
+            log.info(period+"-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+gupiao.getSymbol());
         }
     }
 
@@ -193,24 +192,40 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         if (ComUtil.isEmpty(listKline)){
             return;
         }
+
         if (listKline.get(0).getPeriod()== KlineEnum.K_5M.getId()){
-            List<GupiaoKline5m> list = listKline.stream().map(t -> {
-                GupiaoKline5m gupiaoKline5m = new GupiaoKline5m();
-                BeanUtils.copyProperties(t, gupiaoKline5m);
-                return gupiaoKline5m;
-            }).collect(Collectors.toList());
+            List<String> bizDate = gupiaoKlineRepository.listKlineBizDate5m(listKline.get(0).getSymbol());
+            List<GupiaoKline5m> list = listKline.stream()
+                    .filter(x -> bizDate.contains(x.getBizDate()))
+                    .map(t -> {
+                        GupiaoKline5m gupiaoKline5m = new GupiaoKline5m();
+                        BeanUtils.copyProperties(t, gupiaoKline5m);
+                        return gupiaoKline5m;
+                    })
+                    .collect(Collectors.toList());
+//            log.info("-------数据处理时长--1---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
             gupiaoKline5mRepository.saveAll(list); //保存新增数据
+//            log.info("-------数据处理时长--2---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
         } else if (listKline.get(0).getPeriod()==KlineEnum.K_30M.getId()){
-            List<GupiaoKline30m> list = listKline.stream().map(t -> {
+            List<String> bizDate = gupiaoKlineRepository.listKlineBizDate30m(listKline.get(0).getSymbol());
+            List<GupiaoKline30m> list = listKline.stream()
+                    .filter(x -> bizDate.contains(x.getBizDate()))
+                    .map(t -> {
                 GupiaoKline30m gupiaoKline30m = new GupiaoKline30m();
                 BeanUtils.copyProperties(t, gupiaoKline30m);
                 return gupiaoKline30m;
             }).collect(Collectors.toList());
+//            log.info("-------数据处理时长--3---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
             gupiaoKline30mRepository.saveAll(list); //保存新增数据
+//            log.info("-------数据处理时长--4---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
         } else if (listKline.get(0).getPeriod()==KlineEnum.K_1D.getId()){
-            gupiaoKlineRepository.saveAll(listKline); //保存新增数据
+            List<String> bizDate = gupiaoKlineRepository.listKlineBizDate(listKline.get(0).getSymbol());
+            List<GupiaoKline> list = listKline.stream()
+                    .filter(x -> bizDate.contains(x.getBizDate()))
+                    .collect(Collectors.toList());
+            gupiaoKlineRepository.saveAll(list); //保存新增数据
         }
-        log.info("-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
+
     }
 
     /****
