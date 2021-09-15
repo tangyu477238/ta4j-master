@@ -9,6 +9,10 @@ import java.util.List;
 
 public interface GupiaoKlineRepository extends JpaRepository<GupiaoKline,Integer> {
 
+
+    @Query(value = "select symbol from gupiao where symbol like '11%' or  symbol like '12%' ", nativeQuery = true)
+    List<String> listKzz();
+
     List<GupiaoKline> findBySymbolOrderByBizDate(String bondId);
 
     GupiaoKline findBySymbolAndPeriodAndTimestamp(String bondId, String period, Date date);

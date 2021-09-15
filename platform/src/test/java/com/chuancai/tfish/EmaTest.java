@@ -23,12 +23,9 @@
  */
 package com.chuancai.tfish;
 
-import com.chuancai.tfish.indicators.*;
+import com.chuancai.tfish.indicators.BuyEmaMACDIndicator;
+import com.chuancai.tfish.indicators.XLPLIndicator;
 import com.chuancai.tfish.indicators.impl.ZJRCIndicatorImpl;
-import com.chuancai.tfish.model.Gupiao;
-import com.chuancai.tfish.repository.GupiaoKlineRepository;
-import com.chuancai.tfish.repository.GupiaoRepository;
-import com.chuancai.tfish.repository.GupiaoXinhaoRepository;
 import com.chuancai.tfish.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -43,10 +40,9 @@ import org.ta4j.core.analysis.criteria.VersusBuyAndHoldCriterion;
 import org.ta4j.core.indicators.SMAIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 import org.ta4j.core.indicators.helpers.OpenPriceIndicator;
-import org.ta4j.core.trading.rules.*;
-
-import javax.annotation.Resource;
-import java.util.List;
+import org.ta4j.core.trading.rules.IsEqualRule;
+import org.ta4j.core.trading.rules.OverIndicatorRule;
+import org.ta4j.core.trading.rules.UnderIndicatorRule;
 
 /**
  * Quickstart for ta4j.
@@ -58,12 +54,6 @@ import java.util.List;
 @Slf4j
 public class EmaTest {
 
-
-    @Resource
-    private GupiaoRepository gupiaoRepository;
-
-    @Resource
-    private GupiaoXinhaoRepository gupiaoXinhaoRepository;
 
 
 
@@ -78,7 +68,7 @@ public class EmaTest {
 
 
 
-        List<Gupiao> list = gupiaoRepository.findAll();
+//        List<Gupiao> list = gupiaoRepository.findAll();
 //        Collections.shuffle(list);
 //        list.forEach(gupiao -> {
 //            try {

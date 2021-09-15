@@ -1,22 +1,16 @@
 package com.chuancai.tfish.task;
 
 import com.chuancai.tfish.manager.GupiaoXinhaoManager;
-import com.chuancai.tfish.model.Gupiao;
-import com.chuancai.tfish.model.GupiaoXinhao;
-import com.chuancai.tfish.repository.GupiaoRepository;
-import com.chuancai.tfish.strategy.KzzStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.ta4j.core.BarSeries;
 
 import javax.annotation.Resource;
 import java.text.Format;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 定时任务配置
@@ -36,11 +30,6 @@ public class TodayTasks {
     private String consumerOff;
 
 
-    @Resource
-    private KzzStrategy kzzStrategy;
-
-    @Resource
-    private GupiaoRepository gupiaoRepository;
 
     @Resource
     private GupiaoXinhaoManager gupiaoXinhaoManager;

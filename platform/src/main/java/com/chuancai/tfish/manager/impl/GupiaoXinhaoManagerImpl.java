@@ -2,20 +2,24 @@ package com.chuancai.tfish.manager.impl;
 
 import com.chuancai.tfish.enums.KlineEnum;
 import com.chuancai.tfish.manager.GupiaoXinhaoManager;
-import com.chuancai.tfish.model.*;
-import com.chuancai.tfish.repository.*;
+import com.chuancai.tfish.model.GupiaoKline;
+import com.chuancai.tfish.model.GupiaoKline30m;
+import com.chuancai.tfish.model.GupiaoKline5m;
+import com.chuancai.tfish.model.GupiaoXinhao;
+import com.chuancai.tfish.repository.GupiaoKline30mRepository;
+import com.chuancai.tfish.repository.GupiaoKline5mRepository;
+import com.chuancai.tfish.repository.GupiaoKlineRepository;
+import com.chuancai.tfish.repository.GupiaoXinhaoRepository;
 import com.chuancai.tfish.strategy.KzzStrategy;
 import com.chuancai.tfish.util.ComUtil;
 import com.chuancai.tfish.util.DateTimeUtil;
 import com.chuancai.tfish.util.ExecutorProcessPool;
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.ta4j.core.BarSeries;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -32,8 +36,6 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
     @Resource
     private KzzStrategy kzzStrategy;
 
-    @Resource
-    private GupiaoRepository gupiaoRepository;
 
     @Resource
     private GupiaoKlineRepository gupiaoKlineRepository; //获取day k线对象
@@ -70,10 +72,10 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
     @Override
     public void sysnGupiaoXinhaoAll(Integer period) {
-        List<Gupiao> list = gupiaoRepository.listKzz();
-        for (Gupiao gupiao : list){
+        List<String> list = gupiaoKlineRepository.listKzz();
+        for (String symbol : list){
             try {
-              Runnable run = new GupiaoXinhaoManagerImpl.GupiaoXinhaoAllRunnable(gupiao, period);
+              Runnable run = new GupiaoXinhaoManagerImpl.GupiaoXinhaoAllRunnable(symbol, period);
               ExecutorProcessPool.getInstance().executeByFixedThread(run);
             } catch (Exception e){
                 e.printStackTrace();
@@ -83,20 +85,20 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
 
     public class GupiaoXinhaoAllRunnable implements Runnable{
-        private Gupiao gupiao;
+        private String symbol;
         private Integer period;
-        public GupiaoXinhaoAllRunnable(Gupiao gupiao,Integer period){
-            this.gupiao=gupiao;
+        public GupiaoXinhaoAllRunnable(String symbol,Integer period){
+            this.symbol=symbol;
             this.period = period;
         }
         @Override
         public void run(){
             Date date1 = new Date();
-            List<GupiaoKline> listKline = kzzStrategy.listKine(gupiao.getSymbol(), period); //获取k数据
+            List<GupiaoKline> listKline = kzzStrategy.listKine(symbol, period); //获取k数据
             if (ComUtil.isEmpty(listKline)){
                 return;
             }
-            GupiaoXinhao gupiaoXinhao = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(gupiao.getSymbol(),
+            GupiaoXinhao gupiaoXinhao = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(symbol,
                     "zjrc", listKline.get(0).getBizDate(), period); //验证是否已处理
             if (!ComUtil.isEmpty(gupiaoXinhao)){
                 return;
@@ -110,7 +112,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             List<GupiaoKline> tlist = listTrendKline(listKline);
 //            log.info("-------数据处理时长--b---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
             saveKline(tlist);
-            log.info(period+"-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+gupiao.getSymbol());
+            log.info(period+"-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
         }
     }
 

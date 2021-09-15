@@ -23,35 +23,11 @@
  */
 package com.chuancai.tfish.task;
 
-import com.chuancai.tfish.indicators.BuyEmaMACDIndicator;
-import com.chuancai.tfish.indicators.XLPLIndicator;
-import com.chuancai.tfish.indicators.impl.ZJRCIndicatorImpl;
-import com.chuancai.tfish.manager.GupiaoXinhaoManager;
-import com.chuancai.tfish.model.Gupiao;
-import com.chuancai.tfish.model.GupiaoXinhao;
-import com.chuancai.tfish.repository.GupiaoRepository;
-import com.chuancai.tfish.repository.GupiaoXinhaoRepository;
-import com.chuancai.tfish.strategy.KzzStrategy;
-import com.chuancai.tfish.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.ta4j.core.*;
-import org.ta4j.core.analysis.criteria.AverageProfitableTradesCriterion;
-import org.ta4j.core.analysis.criteria.RewardRiskRatioCriterion;
-import org.ta4j.core.analysis.criteria.TotalProfitCriterion;
-import org.ta4j.core.analysis.criteria.VersusBuyAndHoldCriterion;
-import org.ta4j.core.indicators.SMAIndicator;
-import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
-import org.ta4j.core.indicators.helpers.OpenPriceIndicator;
-import org.ta4j.core.trading.rules.IsEqualRule;
-import org.ta4j.core.trading.rules.OverIndicatorRule;
-import org.ta4j.core.trading.rules.UnderIndicatorRule;
-
-import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * Quickstart for ta4j.
@@ -63,15 +39,6 @@ import java.util.List;
 @Slf4j
 public class TodayTasksTest {
 
-
-    @Resource
-    private KzzStrategy kzzStrategy;
-
-    @Resource
-    private GupiaoRepository gupiaoRepository;
-
-    @Resource
-    private GupiaoXinhaoManager gupiaoXinhaoManager;
 
 
 
