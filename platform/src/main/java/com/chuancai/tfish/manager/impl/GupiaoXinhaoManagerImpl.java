@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -75,46 +77,85 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         List<String> list = gupiaoKlineRepository.listKzz();
         for (String symbol : list){
             try {
-              Runnable run = new GupiaoXinhaoManagerImpl.GupiaoXinhaoAllRunnable(symbol, period);
-              ExecutorProcessPool.getInstance().executeByFixedThread(run);
+                ExecutorService fixedThreadPool = Executors.newFixedThreadPool(16);
+                Runnable run = new GupiaoXinhaoManagerImpl.CalculateZjrcRunnable(symbol, period);
+                fixedThreadPool.execute(run);
             } catch (Exception e){
                 e.printStackTrace();
             }
         }
+
+        list.stream().forEach(symbol->{
+            try {
+                ExecutorService fixedThreadPool = Executors.newFixedThreadPool(16);
+                Runnable run = new GupiaoXinhaoManagerImpl.CalculateTrendRunnable(symbol, period);
+                fixedThreadPool.execute(run);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        });
     }
 
 
-    public class GupiaoXinhaoAllRunnable implements Runnable{
+    public class CalculateZjrcRunnable implements Runnable{
         private String symbol;
         private Integer period;
-        public GupiaoXinhaoAllRunnable(String symbol,Integer period){
+        public CalculateZjrcRunnable(String symbol,Integer period){
             this.symbol=symbol;
             this.period = period;
         }
         @Override
         public void run(){
-            Date date1 = new Date();
-            List<GupiaoKline> listKline = kzzStrategy.listKine(symbol, period); //获取k数据
-            if (ComUtil.isEmpty(listKline)){
-                return;
-            }
-            GupiaoXinhao gupiaoXinhao = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(symbol,
-                    "zjrc", listKline.get(0).getBizDate(), period); //验证是否已处理
-            if (!ComUtil.isEmpty(gupiaoXinhao)){
-                return;
-            }
-
-            Collections.reverse(listKline); // 反转lists
-            BarSeries series = kzzStrategy.getBarSeries(listKline);  //初始化数据
-            saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据
-//            log.info("-------数据处理时长--a---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
-            //存储，趋势计算
-            List<GupiaoKline> tlist = listTrendKline(listKline);
-//            log.info("-------数据处理时长--b---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
-            saveKline(tlist);
-            log.info(period+"-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
+            calculateZjrc(symbol, period);
         }
     }
+
+    public class CalculateTrendRunnable implements Runnable{
+        private String symbol;
+        private Integer period;
+        public CalculateTrendRunnable(String symbol,Integer period){
+            this.symbol=symbol;
+            this.period = period;
+        }
+        @Override
+        public void run(){
+            calculateTrend(symbol,period);
+        }
+    }
+
+
+    private void calculateZjrc(String symbol, Integer period){
+        Date date1 = new Date();
+        List<GupiaoKline> listKline = kzzStrategy.listKine(symbol, period); //获取k数据
+        if (ComUtil.isEmpty(listKline)){
+            return;
+        }
+        GupiaoXinhao gupiaoXinhao = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(symbol,
+                "zjrc", listKline.get(0).getBizDate(), period); //验证是否已处理
+        if (!ComUtil.isEmpty(gupiaoXinhao)){
+            return;
+        }
+        Collections.reverse(listKline); // 反转lists
+        BarSeries series = kzzStrategy.getBarSeries(listKline);  //初始化数据
+        saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据
+        // log.info(period+"-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
+    }
+
+
+
+    private void calculateTrend(String symbol, Integer period){
+        Date date1 = new Date();
+        List<GupiaoKline> listKline = kzzStrategy.listKine(symbol, period); //获取k数据
+        if (ComUtil.isEmpty(listKline)){
+            return;
+        }
+        //存储，趋势计算
+        List<GupiaoKline> tlist = listTrendKline(listKline);
+        saveKline(tlist);
+        log.info(period+"-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
+    }
+
+
 
 
     private List<GupiaoKline>  listTrendKline(List<GupiaoKline> listKline){
