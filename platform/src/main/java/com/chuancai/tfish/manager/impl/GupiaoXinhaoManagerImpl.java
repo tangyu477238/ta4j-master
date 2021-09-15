@@ -138,7 +138,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         Collections.reverse(listKline); // 反转lists
         BarSeries series = kzzStrategy.getBarSeries(listKline);  //初始化数据
         saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据
-        // log.info(period+"-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
+         log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
     }
 
 
@@ -152,7 +152,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         //存储，趋势计算
         List<GupiaoKline> tlist = listTrendKline(listKline);
         saveKline(tlist);
-        log.info(period+"-------数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
+        log.info(period+"-------calculateTrend数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
     }
 
 
