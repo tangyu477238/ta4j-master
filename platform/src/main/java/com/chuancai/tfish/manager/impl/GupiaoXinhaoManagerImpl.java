@@ -85,7 +85,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             }
         }
 
-        list.stream().forEach(symbol->{
+        for (String symbol : list){
             try {
                 ExecutorService fixedThreadPool = Executors.newFixedThreadPool(16);
                 Runnable run = new GupiaoXinhaoManagerImpl.CalculateTrendRunnable(symbol, period);
@@ -93,7 +93,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             } catch (Exception e){
                 e.printStackTrace();
             }
-        });
+        }
     }
 
 
