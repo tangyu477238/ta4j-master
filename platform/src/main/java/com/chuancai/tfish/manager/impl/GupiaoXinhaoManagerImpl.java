@@ -140,6 +140,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         if (ComUtil.isEmpty(listKline)){
             return;
         }
+        Collections.reverse(listKline); // 反转lists
         //存储，趋势计算
         List<GupiaoKline> tlist = listTrendKline(listKline);
         saveKline(tlist);
