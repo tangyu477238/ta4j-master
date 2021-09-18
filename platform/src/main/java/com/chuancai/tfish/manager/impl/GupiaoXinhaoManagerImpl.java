@@ -77,19 +77,10 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         List<String> list = gupiaoKlineRepository.listKzz();
         for (String symbol : list){
             try {
-                ExecutorService fixedThreadPool = Executors.newFixedThreadPool(16);
                 Runnable run = new GupiaoXinhaoManagerImpl.CalculateZjrcRunnable(symbol, period);
-                fixedThreadPool.execute(run);
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-
-        for (String symbol : list){
-            try {
-                ExecutorService fixedThreadPool = Executors.newFixedThreadPool(16);
-                Runnable run = new GupiaoXinhaoManagerImpl.CalculateTrendRunnable(symbol, period);
-                fixedThreadPool.execute(run);
+                ExecutorProcessPool.getInstance().executeByCustomThread(run);
+                Runnable run1 = new GupiaoXinhaoManagerImpl.CalculateTrendRunnable(symbol, period);
+                ExecutorProcessPool.getInstance().executeByCustomThread(run1);
             } catch (Exception e){
                 e.printStackTrace();
             }
