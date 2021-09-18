@@ -21,6 +21,7 @@ import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -53,12 +54,14 @@ public class KzzStrategy {
 
     public BarSeries getBarSeries(List<GupiaoKline> listKline){
         BarSeries series = new BaseBarSeriesBuilder().withName(listKline.get(0).getSymbol()).build();
+//        StringBuffer stringBuffer;
         for(GupiaoKline kline : listKline){
-//          log.info(kline.getTimestamp()+"--"+kline.getOpen()+"--"+kline.getHigh()
-//          +"--"+kline.getLow()+"--"+ kline.getClose()+"--"+kline.getVolume());
-            ZonedDateTime date = ZonedDateTime.parse(kline.getTimestamp() + " PST", DateTimeFormatter.ofPattern("yyyy-MM-dd H:m:s.S z"));
+//            stringBuffer = new StringBuffer(kline.getTimestamp().toString());
+//            ZonedDateTime date = ZonedDateTime.parse(stringBuffer.append(" PST"), DateTimeFormatter.ofPattern("yyyy-MM-dd H:m:s.S z"));
 //            log.info(date.toString());
-            series.addBar(date, kline.getOpen(), kline.getHigh(), kline.getLow(), kline.getClose(), kline.getVolume(), kline.getAmount());
+//            log.info(kline.getTimestamp()+"--"+kline.getOpen()+"--"+kline.getHigh()+"--"+kline.getLow()+"--"+ kline.getClose()+"--"+kline.getVolume());
+            series.addBar(ZonedDateTime.ofInstant(kline.getTimestamp().toInstant(), ZoneId.systemDefault()),
+                    kline.getOpen(), kline.getHigh(), kline.getLow(), kline.getClose(), kline.getVolume(), kline.getAmount());
         }
         return series;
     }
