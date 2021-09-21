@@ -64,7 +64,7 @@ public class TodayTasks {
         if ("0".equals(consumerOff)) return;
         Date current = new Date();
         log.info(MessageFormat.format("todayKzzBy30m，Date：{0}",FORMAT.format(current)));
-        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(30);
+//        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(30);
 
     }
 

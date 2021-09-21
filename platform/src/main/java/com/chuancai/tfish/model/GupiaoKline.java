@@ -69,6 +69,26 @@ public class GupiaoKline implements Serializable {
     private BigDecimal newHigh;
 
 
+    @Column(length = 1)
+    private Integer isMerge;//是否合并有效（1有效，0无效）
+
+    @Column(length = 20)
+    private String beforeDate;
+    @Column(length = 20)
+    private String afterDate;
+
+
+    @Column(length = 1)
+    private Integer yiTrend;//趋势(1上升0下降)
+    @Column(precision = 20, scale = 3)
+    private BigDecimal yiLow;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal yiHigh;
+
+
+
+
+
     @Column(precision = 20, scale = 3)
     private BigDecimal upPrice1;
     @Column(precision = 20, scale = 3)
