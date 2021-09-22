@@ -72,10 +72,17 @@ public class GupiaoKline implements Serializable {
     @Column(length = 1)
     private Integer isMerge;//是否合并有效（1有效，0无效）
 
+
     @Column(length = 20)
     private String beforeDate;
     @Column(length = 20)
     private String afterDate;
+    //合并后重新计算的
+    @Column(precision = 20, scale = 3)
+    private BigDecimal mergeLow;
+    //合并后重新计算的
+    @Column(precision = 20, scale = 3)
+    private BigDecimal mergeHigh;
 
 
     @Column(length = 1)

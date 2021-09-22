@@ -75,6 +75,14 @@ public class GupiaoKline30m implements Serializable {
     @Column(length = 20)
     private String afterDate;
 
+    //合并后重新计算的
+    @Column(precision = 20, scale = 3)
+    private BigDecimal mergeLow;
+    //合并后重新计算的
+    @Column(precision = 20, scale = 3)
+    private BigDecimal mergeHigh;
+
+
     @Column(length = 1)
     private Integer yiTrend;//趋势(1上升0下降)
     @Column(precision = 20, scale = 3)
