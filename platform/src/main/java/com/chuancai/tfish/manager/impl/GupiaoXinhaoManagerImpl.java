@@ -74,6 +74,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         List<String> list = gupiaoKlineRepository.listKzz();
         for (String symbol : list){
             try {
+                if(!"127030".equals(symbol)){
+                    continue;
+                }
                 Runnable run = new GupiaoXinhaoManagerImpl.CalculateZjrcRunnable(symbol, period);
                 ExecutorProcessPool.getInstance().executeByCustomThread(run);
                 Runnable run1 = new GupiaoXinhaoManagerImpl.CalculateTrendRunnable(symbol, period);
@@ -144,7 +147,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             GupiaoKline newPro = map.get(gupiaoKline.getBizDate());
             gupiaoKline.setYiLow(newPro.getYiLow());
             gupiaoKline.setYiHigh(newPro.getYiHigh());
-            gupiaoKline.setYiTrend(newPro.getYiTrend());
+//            gupiaoKline.setYiTrend(newPro.getYiTrend());
         }
         for (int i = tlist.size()-1; i >0; i--) { //包含处理后的数据
             if (tlist.get(i).getIsMerge()==0 && i < (tlist.size()-1)
@@ -152,6 +155,17 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 tlist.get(i).setYiLow(tlist.get(i+1).getYiLow());
                 tlist.get(i).setYiHigh(tlist.get(i+1).getYiHigh());
                 tlist.get(i).setYiTrend(tlist.get(i+1).getYiTrend());
+
+                tlist.get(i).setUpPrice5(tlist.get(i+1).getUpPrice5());
+                tlist.get(i).setDownPrice5(tlist.get(i+1).getDownPrice5());
+                tlist.get(i).setUpPrice4(tlist.get(i+1).getUpPrice4());
+                tlist.get(i).setDownPrice4(tlist.get(i+1).getDownPrice4());
+                tlist.get(i).setUpPrice3(tlist.get(i+1).getUpPrice3());
+                tlist.get(i).setDownPrice3(tlist.get(i+1).getDownPrice3());
+                tlist.get(i).setUpPrice2(tlist.get(i+1).getUpPrice2());
+                tlist.get(i).setDownPrice2(tlist.get(i+1).getDownPrice2());
+                tlist.get(i).setUpPrice1(tlist.get(i+1).getUpPrice1());
+                tlist.get(i).setDownPrice1(tlist.get(i+1).getDownPrice1());
                 continue;
             }
         }
@@ -175,10 +189,40 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
     //确认向下一笔
     private void yiBiSure(int start, int end, BigDecimal highPrice, BigDecimal lowPrice, List<GupiaoKline> listDistinct, int trend){
+        BigDecimal UpPrice5 = new BigDecimal(0);
+        BigDecimal UpPrice4 = new BigDecimal(0);
+        BigDecimal UpPrice3 = new BigDecimal(0);
+        BigDecimal UpPrice2 = new BigDecimal(0);
+
+        BigDecimal DownPrice5 = new BigDecimal(0);
+        BigDecimal DownPrice4 = new BigDecimal(0);
+        BigDecimal DownPrice3 = new BigDecimal(0);
+        BigDecimal DownPrice2 = new BigDecimal(0);
+        if(!ComUtil.isEmpty(listDistinct.get(start-1))){
+            UpPrice5 = listDistinct.get(start-1).getUpPrice4();
+            DownPrice5 = listDistinct.get(start-1).getDownPrice4();
+            UpPrice4 = listDistinct.get(start-1).getUpPrice3();
+            DownPrice4 = listDistinct.get(start-1).getDownPrice3();
+            UpPrice3 = listDistinct.get(start-1).getUpPrice2();
+            DownPrice3 = listDistinct.get(start-1).getDownPrice2();
+            UpPrice2 = listDistinct.get(start-1).getUpPrice1();
+            DownPrice2 = listDistinct.get(start-1).getDownPrice1();
+        }
         for (int i = start; i<=end; i++){
             listDistinct.get(i).setYiTrend(trend);
             listDistinct.get(i).setYiHigh(highPrice);
             listDistinct.get(i).setYiLow(lowPrice);
+
+            listDistinct.get(i).setUpPrice5(UpPrice5);
+            listDistinct.get(i).setDownPrice5(DownPrice5);
+            listDistinct.get(i).setUpPrice4(UpPrice4);
+            listDistinct.get(i).setDownPrice4(DownPrice4);
+            listDistinct.get(i).setUpPrice3(UpPrice3);
+            listDistinct.get(i).setDownPrice3(DownPrice3);
+            listDistinct.get(i).setUpPrice2(UpPrice2);
+            listDistinct.get(i).setDownPrice2(DownPrice2);
+            listDistinct.get(i).setUpPrice1(highPrice);
+            listDistinct.get(i).setDownPrice1(lowPrice);
         }
     }
 
@@ -241,6 +285,8 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
     }
 
 
+
+
     /***
      * 计算顶底
      * @param listDistinct
@@ -257,7 +303,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             if (i<2){
                 continue;
             }
-
+//            GupiaoKline firstPrevious = listDistinct.get(i-3);
             GupiaoKline previous = listDistinct.get(i-2);
             GupiaoKline before = listDistinct.get(i-1);
             GupiaoKline current = listDistinct.get(i);
@@ -525,68 +571,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
 
 
-    private List<GupiaoKline>  listBaohan(List<GupiaoKline> listKline){
-        for (int i = 0; i < listKline.size(); i++) {
-            if (i == 0) {
-                firstKline(listKline); //首根逻辑
-                continue;
-            }
-            GupiaoKline before = listKline.get(i-1); //前一根
-            GupiaoKline current = listKline.get(i); //当前根
 
-            if (isUpTrendBaohan(before, current)){ //判断是否上升
-                current.setTrend(1);
-                if (before.getTrend()==0){
-                    current.setUpPrice5(before.getUpPrice4());
-                    current.setDownPrice5(before.getDownPrice4());
-                    current.setUpPrice4(before.getUpPrice3());
-                    current.setDownPrice4(before.getDownPrice3());
-                    current.setUpPrice3(before.getUpPrice2());
-                    current.setDownPrice3(before.getDownPrice2());
-                    current.setUpPrice2(before.getUpPrice1());
-                    current.setDownPrice2(before.getDownPrice1());
-                } else {
-                    current.setUpPrice5(before.getUpPrice5());
-                    current.setDownPrice5(before.getDownPrice5());
-                    current.setUpPrice4(before.getUpPrice4());
-                    current.setDownPrice4(before.getDownPrice4());
-                    current.setUpPrice3(before.getUpPrice3());
-                    current.setDownPrice3(before.getDownPrice3());
-                    current.setUpPrice2(before.getUpPrice2());
-                    current.setDownPrice2(before.getDownPrice2());
-                }
-                current.setUpPrice1(current.getNewHigh());
-                current.setDownPrice1(before.getDownPrice1()); //低价保持不变
-
-                continue;
-            }
-            current.setTrend(0);
-            if (before.getTrend()==1){
-                current.setUpPrice5(before.getUpPrice4());
-                current.setDownPrice5(before.getDownPrice4());
-                current.setUpPrice4(before.getUpPrice3());
-                current.setDownPrice4(before.getDownPrice3());
-                current.setUpPrice3(before.getUpPrice2());
-                current.setDownPrice3(before.getDownPrice2());
-                current.setUpPrice2(before.getUpPrice1());
-                current.setDownPrice2(before.getDownPrice1());
-            } else {
-                current.setUpPrice5(before.getUpPrice5());
-                current.setDownPrice5(before.getDownPrice5());
-                current.setUpPrice4(before.getUpPrice4());
-                current.setDownPrice4(before.getDownPrice4());
-                current.setUpPrice3(before.getUpPrice3());
-                current.setDownPrice3(before.getDownPrice3());
-                current.setUpPrice2(before.getUpPrice2());
-                current.setDownPrice2(before.getDownPrice2());
-            }
-            current.setUpPrice1(before.getUpPrice1());//高价保持不变
-            current.setDownPrice1(current.getNewLow());
-
-
-        }
-        return listKline;
-    }
 
     private List<GupiaoKline>  listTrendKline(List<GupiaoKline> listKline){
         for (int i = 0; i < listKline.size(); i++) {
