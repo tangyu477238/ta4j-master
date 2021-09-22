@@ -73,9 +73,6 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
     public void sysnGupiaoXinhaoAll(Integer period) {
         List<String> list = gupiaoKlineRepository.listKzz();
         for (String symbol : list){
-            if (!symbol.equals("127030")){
-                continue;
-            }
             try {
                 Runnable run = new GupiaoXinhaoManagerImpl.CalculateZjrcRunnable(symbol, period);
                 ExecutorProcessPool.getInstance().executeByCustomThread(run);
@@ -110,7 +107,6 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         }
         @Override
         public void run(){
-
             //计算数据-------trend-------
             calculateTrend(symbol,period);
         }
@@ -168,12 +164,11 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             return;
         }
         Collections.reverse(listKline); // 反转lists
-        //存储，趋势计算
         calculateBase(listKline); //处理包含关系,以及顶底
         List<GupiaoKline> listDistinct = listKline.stream().filter(t->t.getIsMerge()==1).collect(Collectors.toList()); //去掉包含关系的K线集合
-        calculateBaseByMerge(listDistinct);
-        Map<String, GupiaoKline> map = calculateDingDiByMerge(listDistinct);
-        toCopyKline(listKline, map);
+        calculateBaseByMerge(listDistinct); //重新 处理包含关系,以及顶底
+        Map<String, GupiaoKline> map = calculateDingDiByMerge(listDistinct); //进行计算趋势
+        toCopyKline(listKline, map); //转换和筛选可用数据
         saveKline(listKline);
         log.info(period+"-------calculateTrend数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
     }
@@ -267,9 +262,6 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             GupiaoKline before = listDistinct.get(i-1);
             GupiaoKline current = listDistinct.get(i);
 
-            if (previous.getBizDate().startsWith("2021-09-14")){
-                log.info(previous.getBizDate());
-            }
             if (previous.getYiTrend()==1
                     && before.getYiTrend()==1
                     && current.getYiTrend()==0 && (i-1-diNum)>=3){ //110为顶分型，且距离上次底大于3根k线
