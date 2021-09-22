@@ -14,7 +14,6 @@ import com.chuancai.tfish.strategy.KzzStrategy;
 import com.chuancai.tfish.util.ComUtil;
 import com.chuancai.tfish.util.DateTimeUtil;
 import com.chuancai.tfish.util.ExecutorProcessPool;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -23,8 +22,6 @@ import org.ta4j.core.BarSeries;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -154,7 +151,8 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             gupiaoKline.setYiTrend(newPro.getYiTrend());
         }
         for (int i = tlist.size()-1; i >0; i--) { //包含处理后的数据
-            if (tlist.get(i).getIsMerge()==0 && i < (tlist.size()-1)){
+            if (tlist.get(i).getIsMerge()==0 && i < (tlist.size()-1)
+                    && tlist.get(i+1).getYiHigh() != null){
                 tlist.get(i).setYiLow(tlist.get(i+1).getYiLow());
                 tlist.get(i).setYiHigh(tlist.get(i+1).getYiHigh());
                 tlist.get(i).setYiTrend(tlist.get(i+1).getYiTrend());

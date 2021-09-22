@@ -31,14 +31,14 @@ public interface GupiaoKlineRepository extends JpaRepository<GupiaoKline,Integer
 
 
 
-    @Query(value = "select biz_date as bizDate from gupiao_kline_5m where symbol = ?1 and trend is null  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
+    @Query(value = "select biz_date as bizDate from gupiao_kline_5m where symbol = ?1 and yi_high is null  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
     List<String> listKlineBizDate5m(String bondId);
 
-    @Query(value = "select biz_date as bizDate from gupiao_kline_30m where symbol = ?1 and trend is null  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
+    @Query(value = "select biz_date as bizDate from gupiao_kline_30m where symbol = ?1 and yi_high is null  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
     List<String> listKlineBizDate30m(String bondId);
 
 
-    @Query(value = "select biz_date as bizDate from gupiao_kline where symbol = ?1 and trend is null order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
+    @Query(value = "select biz_date as bizDate from gupiao_kline where symbol = ?1 and yi_high is null order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
     List<String> listKlineBizDate(String bondId);
 
 
