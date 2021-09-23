@@ -301,10 +301,10 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
         boolean isDing = true;
         for (int i = 0; i < listDistinct.size(); i++) {
-            if (i<2){
+            if (i<3){
                 continue;
             }
-//            GupiaoKline firstPrevious = listDistinct.get(i-3);
+            GupiaoKline firstPrevious = listDistinct.get(i-3);
             GupiaoKline previous = listDistinct.get(i-2);
             GupiaoKline before = listDistinct.get(i-1);
             GupiaoKline current = listDistinct.get(i);
@@ -315,9 +315,6 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 if (isDing && highPrice.compareTo(before.getMergeHigh())>0){//上次也是顶,上次>本次最高价
                     continue;
                 }
-//                if (!isDing){ //如果上次为底,那么底已终结
-//                    yiBiSure(dingNum+1, diNum, highPrice, lowPrice, listDistinct,0); //向下一笔确认
-//                }
                 dingNum = i-1;
                 highPrice = before.getMergeHigh();
                 isDing = true;
@@ -328,16 +325,29 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                     && before.getYiTrend()==0
                     && current.getYiTrend()==1 && (i-1-dingNum)>=3){ //001为底分型，且距离上次顶大于3根k线
                 if (!isDing && lowPrice.compareTo(before.getMergeLow())<0){ //上次也是底,上次<本次最低价
+                    current.setPe("1"); //双底,当前底比上一个底要高
                     continue;
                 }
-//                if (isDing){ //如果上次为顶,那么顶已终结
-//                    yiBiSure(diNum+1, dingNum, highPrice, lowPrice, listDistinct,1); //向上一笔确认
-//                }
+                if (isDing && lowPrice.compareTo(before.getMergeLow())<0){
+                    current.setPb("1"); //底--顶--底,当前底比上一个底要高
+                }
                 diNum = i-1;
                 lowPrice = before.getMergeLow();
                 isDing = false;
                 yiBiSure(dingNum+1, diNum, highPrice, lowPrice, listDistinct,0); //向下一笔确认
             }
+
+            //当出现底分型后转折
+            if (firstPrevious.getYiTrend()==0
+                    && previous.getYiTrend()==0
+                    && before.getYiTrend()==1
+                    && current.getYiTrend()==1 && (i-2-dingNum)>=3){ //001为底分型，且距离上次顶大于3根k线
+                if ("1".equals(before.getPb())
+                        && current.getClose().compareTo(before.getHigh()) > 0){ //停顿法
+                    current.setPcf("1");
+                }
+            }
+
 
         }
         return listDistinct.stream().collect(Collectors.toMap(GupiaoKline::getBizDate, Function.identity()));
