@@ -43,6 +43,7 @@ public class GupiaoKline30m implements Serializable {
     @Column(precision = 20, scale = 3)
     private BigDecimal pePrice;
     private String pb;
+    private String pc;
     private String ps;
     private String pcf;
     @Column(precision = 20, scale = 3)

@@ -311,7 +311,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
             if (previous.getYiTrend()==1
                     && before.getYiTrend()==1
-                    && current.getYiTrend()==0 && (i-1-diNum)>=3){ //110为顶分型，且距离上次底大于3根k线
+                    && current.getYiTrend()==0 && (i-1-diNum)>=4){ //110为顶分型，且距离上次底大于4根k线
                 if (isDing && highPrice.compareTo(before.getMergeHigh())>0){//上次也是顶,上次>本次最高价
                     continue;
                 }
@@ -323,10 +323,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
             if (previous.getYiTrend()==0
                     && before.getYiTrend()==0
-                    && current.getYiTrend()==1 && (i-1-dingNum)>=3){ //001为底分型，且距离上次顶大于3根k线
+                    && current.getYiTrend()==1 && (i-1-dingNum)>=4){ //001为底分型，且距离上次顶大于4根k线
                 if (!isDing && lowPrice.compareTo(before.getMergeLow())<0){ //上次也是底,上次<本次最低价
-                    current.setPe("1"); //双底,当前底比上一个底要高
-                    current.setPePrice(before.getNewLow()); //当前低点
+                    current.setPc("1"); //双底,当前底比上一个底要高
                     continue;
                 }
                 if (isDing && lowPrice.compareTo(before.getMergeLow())<0){
@@ -342,9 +341,20 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             if (firstPrevious.getYiTrend()==0
                     && previous.getYiTrend()==0
                     && before.getYiTrend()==1
-                    && current.getYiTrend()==1 && (i-2-dingNum)>=3){ //001为底分型，且距离上次顶大于3根k线
+                    && current.getYiTrend()==1 && (i-2-dingNum)>=4){ //001为底分型，且距离上次顶大于4根k线
+
+                if ("1".equals(before.getPc())
+                        && current.getClose().compareTo(current.getOpen()) > 0
+                        && current.getClose().compareTo(before.getHigh()) > 0
+                        && current.getClose().compareTo(firstPrevious.getHigh()) > 0){ //双底
+                    current.setPe("1");
+                    current.setPePrice(previous.getNewLow()); //最低
+                }
+
                 if ("1".equals(before.getPb())
-                        && current.getClose().compareTo(before.getNewHigh()) > 0){ //停顿法
+                        && current.getClose().compareTo(current.getOpen()) > 0
+                        && current.getClose().compareTo(before.getHigh()) > 0
+                        && current.getClose().compareTo(firstPrevious.getHigh()) > 0){ //停顿法
                     current.setPcf("1");
                     current.setPcfPrice(previous.getNewLow()); //最低
                 }
