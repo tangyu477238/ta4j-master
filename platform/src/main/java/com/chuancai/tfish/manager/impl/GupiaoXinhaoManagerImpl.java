@@ -147,7 +147,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             GupiaoKline newPro = map.get(gupiaoKline.getBizDate());
             gupiaoKline.setYiLow(newPro.getYiLow());
             gupiaoKline.setYiHigh(newPro.getYiHigh());
-//            gupiaoKline.setYiTrend(newPro.getYiTrend());
+            gupiaoKline.setYiTrend(newPro.getYiTrend());
         }
         for (int i = tlist.size()-1; i >0; i--) { //包含处理后的数据
             if (tlist.get(i).getIsMerge()==0 && i < (tlist.size()-1)
@@ -178,10 +178,10 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             return;
         }
         Collections.reverse(listKline); // 反转lists
-        calculateBase(listKline); //处理包含关系,以及顶底
+        calculateBase(listKline); //根据初步趋势线(trend),处理包含关系
         List<GupiaoKline> listDistinct = listKline.stream().filter(t->t.getIsMerge()==1).collect(Collectors.toList()); //去掉包含关系的K线集合
-        calculateBaseByMerge(listDistinct); //重新 处理包含关系,以及顶底
-        Map<String, GupiaoKline> map = calculateDingDiByMerge(listDistinct); //进行计算趋势
+        calculateBaseByMerge(listDistinct); //重新计算得出趋势线(yi_trend)
+        Map<String, GupiaoKline> map = calculateDingDiByMerge(listDistinct); //根据(yi_trend)进行计算趋势
         toCopyKline(listKline, map); //转换和筛选可用数据
         saveKline(listKline);
         log.info(period+"-------calculateTrend数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
@@ -314,12 +314,13 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 if (isDing && highPrice.compareTo(before.getMergeHigh())>0){//上次也是顶,上次>本次最高价
                     continue;
                 }
-                if (!isDing){ //如果上次为底,那么底已终结
-                    yiBiSure(dingNum+1, diNum, highPrice, lowPrice, listDistinct,0); //向下一笔确认
-                }
+//                if (!isDing){ //如果上次为底,那么底已终结
+//                    yiBiSure(dingNum+1, diNum, highPrice, lowPrice, listDistinct,0); //向下一笔确认
+//                }
                 dingNum = i-1;
                 highPrice = before.getMergeHigh();
                 isDing = true;
+                yiBiSure(diNum+1, dingNum, highPrice, lowPrice, listDistinct,1); //向上一笔确认
             }
 
             if (previous.getYiTrend()==0
@@ -329,12 +330,13 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                     continue;
                 }
 
-                if (isDing){ //如果上次为顶,那么顶已终结
-                    yiBiSure(diNum+1, dingNum, highPrice, lowPrice, listDistinct,1); //向上一笔确认
-                }
+//                if (isDing){ //如果上次为顶,那么顶已终结
+//                    yiBiSure(diNum+1, dingNum, highPrice, lowPrice, listDistinct,1); //向上一笔确认
+//                }
                 diNum = i-1;
                 lowPrice = before.getMergeLow();
                 isDing = false;
+                yiBiSure(dingNum+1, diNum, highPrice, lowPrice, listDistinct,0); //向下一笔确认
             }
 
         }
