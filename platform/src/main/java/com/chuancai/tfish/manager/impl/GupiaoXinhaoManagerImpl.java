@@ -178,7 +178,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             return;
         }
         Collections.reverse(listKline); // 反转lists
-        calculateBase(listKline); //根据初步趋势线(trend),处理包含关系
+        calculateBase(listKline); //根据初步趋势线(trend),处理包含关系,计算出(NewHigh,NewLow)
         List<GupiaoKline> listDistinct = listKline.stream().filter(t->t.getIsMerge()==1).collect(Collectors.toList()); //去掉包含关系的K线集合
         calculateBaseByMerge(listDistinct); //重新计算得出趋势线(yi_trend)
         Map<String, GupiaoKline> map = calculateDingDiByMerge(listDistinct); //根据(yi_trend)进行计算趋势
@@ -326,6 +326,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                     && current.getYiTrend()==1 && (i-1-dingNum)>=3){ //001为底分型，且距离上次顶大于3根k线
                 if (!isDing && lowPrice.compareTo(before.getMergeLow())<0){ //上次也是底,上次<本次最低价
                     current.setPe("1"); //双底,当前底比上一个底要高
+                    current.setPePrice(before.getNewLow()); //当前低点
                     continue;
                 }
                 if (isDing && lowPrice.compareTo(before.getMergeLow())<0){
@@ -343,8 +344,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                     && before.getYiTrend()==1
                     && current.getYiTrend()==1 && (i-2-dingNum)>=3){ //001为底分型，且距离上次顶大于3根k线
                 if ("1".equals(before.getPb())
-                        && current.getClose().compareTo(before.getHigh()) > 0){ //停顿法
+                        && current.getClose().compareTo(before.getNewHigh()) > 0){ //停顿法
                     current.setPcf("1");
+                    current.setPcfPrice(previous.getNewLow()); //最低
                 }
             }
 

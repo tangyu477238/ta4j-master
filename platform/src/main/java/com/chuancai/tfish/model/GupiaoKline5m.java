@@ -40,9 +40,13 @@ public class GupiaoKline5m implements Serializable {
     @JsonProperty("amount_post")
     private String amountPost;
     private String pe;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal pePrice;
     private String pb;
     private String ps;
     private String pcf;
+    @Column(precision = 20, scale = 3)
+    private BigDecimal pcfPrice;
     @JsonProperty("market_capital")
     private String marketCapital;
     private String balance;
