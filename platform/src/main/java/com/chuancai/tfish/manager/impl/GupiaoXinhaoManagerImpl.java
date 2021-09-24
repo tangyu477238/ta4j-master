@@ -166,6 +166,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 tlist.get(i).setDownPrice2(tlist.get(i+1).getDownPrice2());
                 tlist.get(i).setUpPrice1(tlist.get(i+1).getUpPrice1());
                 tlist.get(i).setDownPrice1(tlist.get(i+1).getDownPrice1());
+
+                tlist.get(i).setBeforeDate(tlist.get(i+1).getBeforeDate());
+                tlist.get(i).setAfterDate(tlist.get(i+1).getAfterDate());
                 continue;
             }
         }
@@ -198,17 +201,26 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         BigDecimal DownPrice4 = new BigDecimal(0);
         BigDecimal DownPrice3 = new BigDecimal(0);
         BigDecimal DownPrice2 = new BigDecimal(0);
-        if(!ComUtil.isEmpty(listDistinct.get(start-1))){
-            UpPrice5 = listDistinct.get(start-1).getUpPrice4();
-            DownPrice5 = listDistinct.get(start-1).getDownPrice4();
-            UpPrice4 = listDistinct.get(start-1).getUpPrice3();
-            DownPrice4 = listDistinct.get(start-1).getDownPrice3();
-            UpPrice3 = listDistinct.get(start-1).getUpPrice2();
-            DownPrice3 = listDistinct.get(start-1).getDownPrice2();
-            UpPrice2 = listDistinct.get(start-1).getUpPrice1();
-            DownPrice2 = listDistinct.get(start-1).getDownPrice1();
+        String beforeDate = "";
+        String afterDate = "";
+        if(!ComUtil.isEmpty(listDistinct.get(start))){
+            UpPrice5 = listDistinct.get(start).getUpPrice4();
+            DownPrice5 = listDistinct.get(start).getDownPrice4();
+            UpPrice4 = listDistinct.get(start).getUpPrice3();
+            DownPrice4 = listDistinct.get(start).getDownPrice3();
+            UpPrice3 = listDistinct.get(start).getUpPrice2();
+            DownPrice3 = listDistinct.get(start).getDownPrice2();
+            UpPrice2 = listDistinct.get(start).getUpPrice1();
+            DownPrice2 = listDistinct.get(start).getDownPrice1();
+            if (trend==1) {
+                beforeDate = listDistinct.get(start).getBeforeDate();
+                afterDate = listDistinct.get(start).getBizDate();
+            } else {
+                beforeDate = listDistinct.get(start).getBizDate();
+                afterDate = listDistinct.get(start).getAfterDate();
+            }
         }
-        for (int i = start; i<=end; i++){
+        for (int i = start+1; i<=end; i++){
             listDistinct.get(i).setYiTrend(trend);
             listDistinct.get(i).setYiHigh(highPrice);
             listDistinct.get(i).setYiLow(lowPrice);
@@ -224,6 +236,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
             listDistinct.get(i).setUpPrice1(highPrice);
             listDistinct.get(i).setDownPrice1(lowPrice);
+
+            listDistinct.get(i).setBeforeDate(beforeDate);
+            listDistinct.get(i).setAfterDate(afterDate);
         }
     }
 
@@ -285,8 +300,26 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 //        return listDistinct.stream().collect(Collectors.toMap(GupiaoKline::getBizDate, Function.identity()));
 //    }
 
-
-
+    /**
+     * 计算饱满
+     * @param kline
+     * @return
+     */
+    private boolean getSun(GupiaoKline kline){
+        BigDecimal hl = kline.getHigh().subtract(kline.getLow());
+        BigDecimal ho = kline.getHigh().subtract(kline.getOpen());
+        BigDecimal cl = kline.getClose().subtract(kline.getLow());
+        BigDecimal co = kline.getClose().subtract(kline.getOpen());
+        BigDecimal v1 = hl.multiply(new BigDecimal(2)).subtract(co.abs());
+        BigDecimal tv2 = kline.getClose().compareTo(kline.getOpen()) < 0 ?
+                ho.add(cl).divide(v1,2, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100)) : new BigDecimal(50);
+        BigDecimal v2 = kline.getClose().compareTo(kline.getOpen()) > 0 ?
+                hl.divide(v1,2, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100)) : tv2;
+        if (v2.intValue()>70){
+            return true;
+        }
+        return false;
+    }
 
     /***
      * 计算顶底
@@ -318,7 +351,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 dingNum = i-1;
                 highPrice = before.getMergeHigh();
                 isDing = true;
-                yiBiSure(diNum+1, dingNum, highPrice, lowPrice, listDistinct,1); //向上一笔确认
+                yiBiSure(diNum, dingNum, highPrice, lowPrice, listDistinct,1); //向上一笔确认
             }
 
             if (previous.getYiTrend()==0
@@ -334,7 +367,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 diNum = i-1;
                 lowPrice = before.getMergeLow();
                 isDing = false;
-                yiBiSure(dingNum+1, diNum, highPrice, lowPrice, listDistinct,0); //向下一笔确认
+                yiBiSure(dingNum, diNum, highPrice, lowPrice, listDistinct,0); //向下一笔确认
             }
 
             //当出现底分型后转折
@@ -344,7 +377,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                     && current.getYiTrend()==1 && (i-2-dingNum)>=4){ //001为底分型，且距离上次顶大于4根k线
 
                 if ("1".equals(before.getPc())
-                        && current.getClose().compareTo(current.getOpen()) > 0
+                        && getSun(current)
                         && current.getClose().compareTo(before.getHigh()) > 0
                         && current.getClose().compareTo(firstPrevious.getHigh()) > 0){ //双底
                     current.setPe("1");
@@ -352,7 +385,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 }
 
                 if ("1".equals(before.getPb())
-                        && current.getClose().compareTo(current.getOpen()) > 0
+                        && getSun(current)
                         && current.getClose().compareTo(before.getHigh()) > 0
                         && current.getClose().compareTo(firstPrevious.getHigh()) > 0){ //停顿法
                     current.setPcf("1");
@@ -409,6 +442,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         listKline.get(0).setNewHigh(listKline.get(0).getHigh());
         listKline.get(0).setNewLow(listKline.get(0).getLow());
         listKline.get(0).setIsMerge(1); //有效
+
+        listKline.get(0).setBeforeDate(listKline.get(0).getBizDate());
+        listKline.get(0).setAfterDate(listKline.get(0).getBizDate());
     }
 
     private List<GupiaoKline> calculateBase(List<GupiaoKline> listKline){
