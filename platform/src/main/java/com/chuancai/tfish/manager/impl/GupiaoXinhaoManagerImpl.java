@@ -169,6 +169,14 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
                 tlist.get(i).setBeforeDate(tlist.get(i+1).getBeforeDate());
                 tlist.get(i).setAfterDate(tlist.get(i+1).getAfterDate());
+                tlist.get(i).setBeforeDate2(tlist.get(i+1).getBeforeDate2());
+                tlist.get(i).setAfterDate2(tlist.get(i+1).getAfterDate2());
+                tlist.get(i).setBeforeDate3(tlist.get(i+1).getBeforeDate3());
+                tlist.get(i).setAfterDate3(tlist.get(i+1).getAfterDate3());
+                tlist.get(i).setBeforeDate4(tlist.get(i+1).getBeforeDate4());
+                tlist.get(i).setAfterDate4(tlist.get(i+1).getAfterDate4());
+                tlist.get(i).setBeforeDate5(tlist.get(i+1).getBeforeDate5());
+                tlist.get(i).setAfterDate5(tlist.get(i+1).getAfterDate5());
                 continue;
             }
         }
@@ -203,21 +211,59 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         BigDecimal DownPrice2 = new BigDecimal(0);
         String beforeDate = "";
         String afterDate = "";
+        String beforeDate2 = "";
+        String afterDate2 = "";
+        String beforeDate3 = "";
+        String afterDate3 = "";
+        String beforeDate4 = "";
+        String afterDate4 = "";
+        String beforeDate5 = "";
+        String afterDate5 = "";
         if(!ComUtil.isEmpty(listDistinct.get(start))){
-            UpPrice5 = listDistinct.get(start).getUpPrice4();
-            DownPrice5 = listDistinct.get(start).getDownPrice4();
-            UpPrice4 = listDistinct.get(start).getUpPrice3();
-            DownPrice4 = listDistinct.get(start).getDownPrice3();
-            UpPrice3 = listDistinct.get(start).getUpPrice2();
-            DownPrice3 = listDistinct.get(start).getDownPrice2();
-            UpPrice2 = listDistinct.get(start).getUpPrice1();
-            DownPrice2 = listDistinct.get(start).getDownPrice1();
-            if (trend==1) {
-                beforeDate = listDistinct.get(start).getBeforeDate();
+            DownPrice5 = listDistinct.get(start).getDownPrice5();
+            UpPrice5 = listDistinct.get(start).getUpPrice5();
+            DownPrice4 = listDistinct.get(start).getDownPrice4();
+            UpPrice4 = listDistinct.get(start).getUpPrice4();
+            DownPrice3 = listDistinct.get(start).getDownPrice3();
+            UpPrice3 = listDistinct.get(start).getUpPrice3();
+            DownPrice2 = listDistinct.get(start).getDownPrice2();
+            UpPrice2 = listDistinct.get(start).getUpPrice2();
+
+            if (trend==0){
+                DownPrice5 = listDistinct.get(start).getDownPrice4();
+                DownPrice4 = listDistinct.get(start).getDownPrice3();
+                DownPrice3 = listDistinct.get(start).getDownPrice2();
+                DownPrice2 = listDistinct.get(start).getDownPrice1();
+            } else {
+                UpPrice5 = listDistinct.get(start).getUpPrice4();
+                UpPrice4 = listDistinct.get(start).getUpPrice3();
+                UpPrice3 = listDistinct.get(start).getUpPrice2();
+                UpPrice2 = listDistinct.get(start).getUpPrice1();
+            }
+
+            beforeDate = listDistinct.get(start).getBeforeDate();
+            afterDate = listDistinct.get(start).getAfterDate();
+            beforeDate2 = listDistinct.get(start).getBeforeDate2();
+            afterDate2 = listDistinct.get(start).getAfterDate2();
+            beforeDate3 = listDistinct.get(start).getBeforeDate3();
+            afterDate3 = listDistinct.get(start).getAfterDate3();
+            beforeDate4 = listDistinct.get(start).getBeforeDate4();
+            afterDate4 = listDistinct.get(start).getAfterDate4();
+            beforeDate5 = listDistinct.get(start).getBeforeDate5();
+            afterDate5 = listDistinct.get(start).getAfterDate5();
+
+            if (trend==0) {
+                afterDate5 = listDistinct.get(start).getAfterDate4();
+                afterDate4 = listDistinct.get(start).getAfterDate3();
+                afterDate3 = listDistinct.get(start).getAfterDate2();
+                afterDate2 = listDistinct.get(start).getAfterDate();
                 afterDate = listDistinct.get(start).getBizDate();
             } else {
+                beforeDate5 = listDistinct.get(start).getBeforeDate4();
+                beforeDate4 = listDistinct.get(start).getBeforeDate3();
+                beforeDate3 = listDistinct.get(start).getBeforeDate2();
+                beforeDate2 = listDistinct.get(start).getBeforeDate();
                 beforeDate = listDistinct.get(start).getBizDate();
-                afterDate = listDistinct.get(start).getAfterDate();
             }
         }
         for (int i = start+1; i<=end; i++){
@@ -239,6 +285,14 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
             listDistinct.get(i).setBeforeDate(beforeDate);
             listDistinct.get(i).setAfterDate(afterDate);
+            listDistinct.get(i).setBeforeDate2(beforeDate2);
+            listDistinct.get(i).setAfterDate2(afterDate2);
+            listDistinct.get(i).setBeforeDate3(beforeDate3);
+            listDistinct.get(i).setAfterDate3(afterDate3);
+            listDistinct.get(i).setBeforeDate4(beforeDate4);
+            listDistinct.get(i).setAfterDate4(afterDate4);
+            listDistinct.get(i).setBeforeDate5(beforeDate5);
+            listDistinct.get(i).setAfterDate5(afterDate5);
         }
     }
 

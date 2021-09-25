@@ -75,10 +75,28 @@ public class GupiaoKline5m implements Serializable {
 
     @Column(length = 1)
     private Integer isMerge;//是否合并有效（1有效，0无效）
+
     @Column(length = 20)
-    private String beforeDate;
+    private String beforeDate;//前底
     @Column(length = 20)
-    private String afterDate;
+    private String afterDate;//前顶
+    @Column(length = 20)
+    private String beforeDate2;
+    @Column(length = 20)
+    private String afterDate2;
+    @Column(length = 20)
+    private String beforeDate3;
+    @Column(length = 20)
+    private String afterDate3;
+    @Column(length = 20)
+    private String beforeDate4;
+    @Column(length = 20)
+    private String afterDate4;
+    @Column(length = 20)
+    private String beforeDate5;
+    @Column(length = 20)
+    private String afterDate5;
+
     //合并后重新计算的
     @Column(precision = 20, scale = 3)
     private BigDecimal mergeLow;
