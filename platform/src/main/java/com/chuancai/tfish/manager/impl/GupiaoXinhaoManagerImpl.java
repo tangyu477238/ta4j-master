@@ -243,6 +243,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
             beforeDate = listDistinct.get(start).getBeforeDate();
             afterDate = listDistinct.get(start).getAfterDate();
+
             beforeDate2 = listDistinct.get(start).getBeforeDate2();
             afterDate2 = listDistinct.get(start).getAfterDate2();
             beforeDate3 = listDistinct.get(start).getBeforeDate3();
@@ -252,18 +253,18 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             beforeDate5 = listDistinct.get(start).getBeforeDate5();
             afterDate5 = listDistinct.get(start).getAfterDate5();
 
-            if (trend==0) {
+            if (trend==1) { //向上一笔
                 afterDate5 = listDistinct.get(start).getAfterDate4();
                 afterDate4 = listDistinct.get(start).getAfterDate3();
                 afterDate3 = listDistinct.get(start).getAfterDate2();
                 afterDate2 = listDistinct.get(start).getAfterDate();
-                afterDate = listDistinct.get(start).getBizDate();
+                afterDate = listDistinct.get(end).getBizDate();
             } else {
                 beforeDate5 = listDistinct.get(start).getBeforeDate4();
                 beforeDate4 = listDistinct.get(start).getBeforeDate3();
                 beforeDate3 = listDistinct.get(start).getBeforeDate2();
                 beforeDate2 = listDistinct.get(start).getBeforeDate();
-                beforeDate = listDistinct.get(start).getBizDate();
+                beforeDate = listDistinct.get(end).getBizDate();
             }
         }
         for (int i = start+1; i<=end; i++){
