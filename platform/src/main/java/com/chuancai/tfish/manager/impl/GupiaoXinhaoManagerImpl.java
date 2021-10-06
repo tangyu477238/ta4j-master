@@ -2,10 +2,7 @@ package com.chuancai.tfish.manager.impl;
 
 import com.chuancai.tfish.enums.KlineEnum;
 import com.chuancai.tfish.manager.GupiaoXinhaoManager;
-import com.chuancai.tfish.model.GupiaoKline;
-import com.chuancai.tfish.model.GupiaoKline30m;
-import com.chuancai.tfish.model.GupiaoKline5m;
-import com.chuancai.tfish.model.GupiaoXinhao;
+import com.chuancai.tfish.model.*;
 import com.chuancai.tfish.repository.GupiaoKline30mRepository;
 import com.chuancai.tfish.repository.GupiaoKline5mRepository;
 import com.chuancai.tfish.repository.GupiaoKlineRepository;
@@ -14,8 +11,10 @@ import com.chuancai.tfish.strategy.KzzStrategy;
 import com.chuancai.tfish.util.ComUtil;
 import com.chuancai.tfish.util.DateTimeUtil;
 import com.chuancai.tfish.util.ExecutorProcessPool;
+import com.chuancai.tfish.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.ta4j.core.BarSeries;
 
@@ -74,9 +73,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         List<String> list = gupiaoKlineRepository.listKzz();
         for (String symbol : list){
             try {
-//                if(!"127030".equals(symbol)){
-//                    continue;
-//                }
+                if(!"127015".equals(symbol)){
+                    continue;
+                }
                 Runnable run = new GupiaoXinhaoManagerImpl.CalculateZjrcRunnable(symbol, period);
                 ExecutorProcessPool.getInstance().executeByCustomThread(run);
                 Runnable run1 = new GupiaoXinhaoManagerImpl.CalculateTrendRunnable(symbol, period);
@@ -200,159 +199,171 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
     //确认方向上的一笔
     private void yiBiSure(int start, int end, BigDecimal highPrice, BigDecimal lowPrice, List<GupiaoKline> listDistinct, int trend){
-        BigDecimal UpPrice5 = new BigDecimal(0);
-        BigDecimal UpPrice4 = new BigDecimal(0);
-        BigDecimal UpPrice3 = new BigDecimal(0);
-        BigDecimal UpPrice2 = new BigDecimal(0);
 
-        BigDecimal DownPrice5 = new BigDecimal(0);
-        BigDecimal DownPrice4 = new BigDecimal(0);
-        BigDecimal DownPrice3 = new BigDecimal(0);
-        BigDecimal DownPrice2 = new BigDecimal(0);
-        String beforeDate = "";
-        String afterDate = "";
-        String beforeDate2 = "";
-        String afterDate2 = "";
-        String beforeDate3 = "";
-        String afterDate3 = "";
-        String beforeDate4 = "";
-        String afterDate4 = "";
-        String beforeDate5 = "";
-        String afterDate5 = "";
-        if(!ComUtil.isEmpty(listDistinct.get(start))){
-            DownPrice5 = listDistinct.get(start).getDownPrice5();
-            UpPrice5 = listDistinct.get(start).getUpPrice5();
-            DownPrice4 = listDistinct.get(start).getDownPrice4();
-            UpPrice4 = listDistinct.get(start).getUpPrice4();
-            DownPrice3 = listDistinct.get(start).getDownPrice3();
-            UpPrice3 = listDistinct.get(start).getUpPrice3();
-            DownPrice2 = listDistinct.get(start).getDownPrice2();
-            UpPrice2 = listDistinct.get(start).getUpPrice2();
+        updateTrendKline(start,end,highPrice,lowPrice,listDistinct,trend);
 
-            if (trend==0){
-                DownPrice5 = listDistinct.get(start).getDownPrice4();
-                DownPrice4 = listDistinct.get(start).getDownPrice3();
-                DownPrice3 = listDistinct.get(start).getDownPrice2();
-                DownPrice2 = listDistinct.get(start).getDownPrice1();
-            } else {
-                UpPrice5 = listDistinct.get(start).getUpPrice4();
-                UpPrice4 = listDistinct.get(start).getUpPrice3();
-                UpPrice3 = listDistinct.get(start).getUpPrice2();
-                UpPrice2 = listDistinct.get(start).getUpPrice1();
-            }
 
-            beforeDate = listDistinct.get(start).getBeforeDate();
-            afterDate = listDistinct.get(start).getAfterDate();
-            beforeDate2 = listDistinct.get(start).getBeforeDate2();
-            afterDate2 = listDistinct.get(start).getAfterDate2();
-            beforeDate3 = listDistinct.get(start).getBeforeDate3();
-            afterDate3 = listDistinct.get(start).getAfterDate3();
-            beforeDate4 = listDistinct.get(start).getBeforeDate4();
-            afterDate4 = listDistinct.get(start).getAfterDate4();
-            beforeDate5 = listDistinct.get(start).getBeforeDate5();
-            afterDate5 = listDistinct.get(start).getAfterDate5();
+//        BigDecimal UpPrice5 = new BigDecimal(0);
+//        BigDecimal UpPrice4 = new BigDecimal(0);
+//        BigDecimal UpPrice3 = new BigDecimal(0);
+//        BigDecimal UpPrice2 = new BigDecimal(0);
+//
+//        BigDecimal DownPrice5 = new BigDecimal(0);
+//        BigDecimal DownPrice4 = new BigDecimal(0);
+//        BigDecimal DownPrice3 = new BigDecimal(0);
+//        BigDecimal DownPrice2 = new BigDecimal(0);
+//        String beforeDate = "";
+//        String afterDate = "";
+//        String beforeDate2 = "";
+//        String afterDate2 = "";
+//        String beforeDate3 = "";
+//        String afterDate3 = "";
+//        String beforeDate4 = "";
+//        String afterDate4 = "";
+//        String beforeDate5 = "";
+//        String afterDate5 = "";
+//        if(!ComUtil.isEmpty(listDistinct.get(start))){
+//            DownPrice5 = listDistinct.get(start).getDownPrice5();
+//            UpPrice5 = listDistinct.get(start).getUpPrice5();
+//            DownPrice4 = listDistinct.get(start).getDownPrice4();
+//            UpPrice4 = listDistinct.get(start).getUpPrice4();
+//            DownPrice3 = listDistinct.get(start).getDownPrice3();
+//            UpPrice3 = listDistinct.get(start).getUpPrice3();
+//            DownPrice2 = listDistinct.get(start).getDownPrice2();
+//            UpPrice2 = listDistinct.get(start).getUpPrice2();
+//
+//            if (trend==0){
+//                DownPrice5 = listDistinct.get(start).getDownPrice4();
+//                DownPrice4 = listDistinct.get(start).getDownPrice3();
+//                DownPrice3 = listDistinct.get(start).getDownPrice2();
+//                DownPrice2 = listDistinct.get(start).getDownPrice1();
+//            } else {
+//                UpPrice5 = listDistinct.get(start).getUpPrice4();
+//                UpPrice4 = listDistinct.get(start).getUpPrice3();
+//                UpPrice3 = listDistinct.get(start).getUpPrice2();
+//                UpPrice2 = listDistinct.get(start).getUpPrice1();
+//            }
+//
+//            beforeDate = listDistinct.get(start).getBeforeDate();
+//            afterDate = listDistinct.get(start).getAfterDate();
+//            beforeDate2 = listDistinct.get(start).getBeforeDate2();
+//            afterDate2 = listDistinct.get(start).getAfterDate2();
+//            beforeDate3 = listDistinct.get(start).getBeforeDate3();
+//            afterDate3 = listDistinct.get(start).getAfterDate3();
+//            beforeDate4 = listDistinct.get(start).getBeforeDate4();
+//            afterDate4 = listDistinct.get(start).getAfterDate4();
+//            beforeDate5 = listDistinct.get(start).getBeforeDate5();
+//            afterDate5 = listDistinct.get(start).getAfterDate5();
+//
+//            if (trend==0) {
+//                afterDate5 = listDistinct.get(start).getAfterDate4();
+//                afterDate4 = listDistinct.get(start).getAfterDate3();
+//                afterDate3 = listDistinct.get(start).getAfterDate2();
+//                afterDate2 = listDistinct.get(start).getAfterDate();
+//                afterDate = listDistinct.get(start).getBizDate();
+//            } else {
+//                beforeDate5 = listDistinct.get(start).getBeforeDate4();
+//                beforeDate4 = listDistinct.get(start).getBeforeDate3();
+//                beforeDate3 = listDistinct.get(start).getBeforeDate2();
+//                beforeDate2 = listDistinct.get(start).getBeforeDate();
+//                beforeDate = listDistinct.get(start).getBizDate();
+//            }
+//        }
+//        for (int i = start+1; i<=end; i++){
+//            listDistinct.get(i).setYiTrend(trend);
+//            listDistinct.get(i).setYiHigh(highPrice);
+//            listDistinct.get(i).setYiLow(lowPrice);
+//
+//            listDistinct.get(i).setUpPrice5(UpPrice5);
+//            listDistinct.get(i).setDownPrice5(DownPrice5);
+//            listDistinct.get(i).setUpPrice4(UpPrice4);
+//            listDistinct.get(i).setDownPrice4(DownPrice4);
+//            listDistinct.get(i).setUpPrice3(UpPrice3);
+//            listDistinct.get(i).setDownPrice3(DownPrice3);
+//            listDistinct.get(i).setUpPrice2(UpPrice2);
+//            listDistinct.get(i).setDownPrice2(DownPrice2);
+//
+//            listDistinct.get(i).setUpPrice1(highPrice);
+//            listDistinct.get(i).setDownPrice1(lowPrice);
+//
+//            listDistinct.get(i).setBeforeDate(beforeDate);
+//            listDistinct.get(i).setAfterDate(afterDate);
+//            listDistinct.get(i).setBeforeDate2(beforeDate2);
+//            listDistinct.get(i).setAfterDate2(afterDate2);
+//            listDistinct.get(i).setBeforeDate3(beforeDate3);
+//            listDistinct.get(i).setAfterDate3(afterDate3);
+//            listDistinct.get(i).setBeforeDate4(beforeDate4);
+//            listDistinct.get(i).setAfterDate4(afterDate4);
+//            listDistinct.get(i).setBeforeDate5(beforeDate5);
+//            listDistinct.get(i).setAfterDate5(afterDate5);
+//        }
+    }
 
-            if (trend==0) {
-                afterDate5 = listDistinct.get(start).getAfterDate4();
-                afterDate4 = listDistinct.get(start).getAfterDate3();
-                afterDate3 = listDistinct.get(start).getAfterDate2();
-                afterDate2 = listDistinct.get(start).getAfterDate();
-                afterDate = listDistinct.get(start).getBizDate();
-            } else {
-                beforeDate5 = listDistinct.get(start).getBeforeDate4();
-                beforeDate4 = listDistinct.get(start).getBeforeDate3();
-                beforeDate3 = listDistinct.get(start).getBeforeDate2();
-                beforeDate2 = listDistinct.get(start).getBeforeDate();
-                beforeDate = listDistinct.get(start).getBizDate();
-            }
-        }
+    /**
+     *
+     * @param start
+     * @param end
+     * @param highPrice
+     * @param lowPrice
+     * @param listDistinct
+     * @param trend
+     */
+    private void updateTrendKline(int start, int end,BigDecimal highPrice, BigDecimal lowPrice, List<GupiaoKline> listDistinct, int trend){
+        TrendDTO trendDTO = new TrendDTO();
+        BeanUtils.copyProperties(listDistinct.get(start), trendDTO); //上一轮得基础数据复制过来
         for (int i = start+1; i<=end; i++){
             listDistinct.get(i).setYiTrend(trend);
             listDistinct.get(i).setYiHigh(highPrice);
             listDistinct.get(i).setYiLow(lowPrice);
 
-            listDistinct.get(i).setUpPrice5(UpPrice5);
-            listDistinct.get(i).setDownPrice5(DownPrice5);
-            listDistinct.get(i).setUpPrice4(UpPrice4);
-            listDistinct.get(i).setDownPrice4(DownPrice4);
-            listDistinct.get(i).setUpPrice3(UpPrice3);
-            listDistinct.get(i).setDownPrice3(DownPrice3);
-            listDistinct.get(i).setUpPrice2(UpPrice2);
-            listDistinct.get(i).setDownPrice2(DownPrice2);
-
+            BeanUtils.copyProperties(trendDTO, listDistinct.get(i)); //放进新得对象
+            if (trend == 0) { //下降趋势
+                CopyTrendInfoDown(listDistinct.get(i));
+                listDistinct.get(i).setDownPrice1(lowPrice);
+                listDistinct.get(i).setBeforeDate(listDistinct.get(end).getBizDate());
+                continue;
+            }
+            CopyTrendInfoUp(listDistinct.get(i));
             listDistinct.get(i).setUpPrice1(highPrice);
-            listDistinct.get(i).setDownPrice1(lowPrice);
-
-            listDistinct.get(i).setBeforeDate(beforeDate);
-            listDistinct.get(i).setAfterDate(afterDate);
-            listDistinct.get(i).setBeforeDate2(beforeDate2);
-            listDistinct.get(i).setAfterDate2(afterDate2);
-            listDistinct.get(i).setBeforeDate3(beforeDate3);
-            listDistinct.get(i).setAfterDate3(afterDate3);
-            listDistinct.get(i).setBeforeDate4(beforeDate4);
-            listDistinct.get(i).setAfterDate4(afterDate4);
-            listDistinct.get(i).setBeforeDate5(beforeDate5);
-            listDistinct.get(i).setAfterDate5(afterDate5);
+            listDistinct.get(i).setAfterDate(listDistinct.get(end).getBizDate());
         }
     }
 
 
-//    /***
-//     * 计算顶底
-//     * @param listDistinct
-//     */
-//    private Map<String, GupiaoKline> calculateDingDi(List<GupiaoKline> listDistinct ){
-//        int dingNum = 0;
-//        BigDecimal highPrice = new BigDecimal(0);
-//
-//        int diNum = 0 ;
-//        BigDecimal lowPrice = new BigDecimal(0);
-//
-//        boolean isDing = true;
-//        for (int i = 0; i < listDistinct.size(); i++) {
-//            if (i<2){
-//                continue;
-//            }
-//
-//            GupiaoKline previous = listDistinct.get(i-2);
-//            GupiaoKline before = listDistinct.get(i-1);
-//            GupiaoKline current = listDistinct.get(i);
-//
-//            if (previous.getBizDate().startsWith("2021-09-14")){
-//                log.info(previous.getBizDate());
-//            }
-//            if (previous.getTrend()==1
-//                    &&before.getTrend()==1
-//                    &&current.getTrend()==0 && (i-1-diNum)>=3){ //110为顶分型，且距离上次底大于3根k线
-//                if (isDing && highPrice.compareTo(before.getNewHigh())>0){//上次也是顶,上次>本次最高价
-//                    continue;
-//                }
-//                if (!isDing){ //如果上次为底,那么底已终结
-//                    yiBiSure(dingNum+1, diNum, highPrice, lowPrice, listDistinct,0); //向下一笔确认
-//                }
-//                dingNum = i-1;
-//                highPrice = before.getNewHigh();
-//                isDing = true;
-//            }
-//
-//            if (previous.getTrend()==0
-//                    &&before.getTrend()==0
-//                    &&current.getTrend()==1 && (i-1-dingNum)>=3){ //001为底分型，且距离上次顶大于3根k线
-//                if (!isDing && lowPrice.compareTo(before.getNewLow())<0){ //上次也是底,上次<本次最低价
-//                    continue;
-//                }
-//
-//                if (isDing){ //如果上次为顶,那么顶已终结
-//                    yiBiSure(diNum+1, dingNum, highPrice, lowPrice, listDistinct,1); //向上一笔确认
-//                }
-//                diNum = i-1;
-//                lowPrice = before.getNewLow();
-//                isDing = false;
-//            }
-//
-//        }
-//        return listDistinct.stream().collect(Collectors.toMap(GupiaoKline::getBizDate, Function.identity()));
-//    }
+    /****
+     * 上升 复制
+     * @param kline
+     */
+    private GupiaoKline CopyTrendInfoUp(GupiaoKline kline){
+        kline.setUpPrice5(kline.getUpPrice4());
+        kline.setUpPrice4(kline.getUpPrice3());
+        kline.setUpPrice3(kline.getUpPrice2());
+        kline.setUpPrice2(kline.getUpPrice1());
+
+        kline.setAfterDate5(kline.getAfterDate4());
+        kline.setAfterDate4(kline.getAfterDate3());
+        kline.setAfterDate3(kline.getAfterDate2());
+        kline.setAfterDate2(kline.getAfterDate());
+        return kline;
+    }
+
+    /****
+     * 下降 复制
+     * @param kline
+     */
+    private GupiaoKline CopyTrendInfoDown(GupiaoKline kline){
+        kline.setDownPrice5(kline.getDownPrice4());
+        kline.setDownPrice4(kline.getDownPrice3());
+        kline.setDownPrice3(kline.getDownPrice2());
+        kline.setDownPrice2(kline.getDownPrice1());
+
+        kline.setBeforeDate5(kline.getBeforeDate4());
+        kline.setBeforeDate4(kline.getBeforeDate3());
+        kline.setBeforeDate3(kline.getBeforeDate2());
+        kline.setBeforeDate2(kline.getBeforeDate());
+        return kline;
+    }
+
 
     /**
      * 计算饱满
@@ -463,10 +474,14 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
     }
 
     private List<GupiaoKline> calculateBaseByMerge(List<GupiaoKline> listKline){
+        int trendFlag = 0;
         for (int i = 0; i < listKline.size(); i++) {
             if (i == 0) {
                 firstKlineByMerge(listKline); //首根逻辑
                 continue;
+            }
+            if (i-2 >= 0){ //且包含处理后为有效时,进行更新
+                trendFlag = listKline.get(i-2).getTrend(); //往前第2根走势
             }
             GupiaoKline before = listKline.get(i-1); //前一根
             GupiaoKline current = listKline.get(i); //当前根
@@ -502,24 +517,31 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
     }
 
     private List<GupiaoKline> calculateBase(List<GupiaoKline> listKline){
+        int trendFlag = 0;
         for (int i = 0; i < listKline.size(); i++) {
             if (i == 0) {
                 firstKline(listKline); //首根逻辑
                 continue;
             }
+//            if (i-2 >= 0 && listKline.get(i-2).getIsMerge()==1){ //且包含处理后为有效时,进行更新
+//                trendFlag = listKline.get(i-2).getTrend(); //往前第2根走势
+//            }
+
             GupiaoKline before = listKline.get(i-1); //前一根
+            trendFlag = before.getTrend(); //往前第1根走势
+
             GupiaoKline current = listKline.get(i); //当前根
 
             current.setTrend(0);//设置为 false
-            if (isUp(before, current)){
+            if (isUp(before, current, trendFlag)){ //判断是否为上升趋势
                 current.setTrend(1);
             }
             current.setIsMerge(1);//设置为 false
-            if (isMerge(before, current)){
+            if (isMerge(before, current)){ //判断是否存在包含
                 before.setIsMerge(0);//前一天设置为无效
             }
-            current.setNewHigh(getNewHigh(before, current));
-            current.setNewLow(getNewLow(before, current));
+            current.setNewHigh(getNewHigh(before, current, trendFlag));
+            current.setNewLow(getNewLow(before, current, trendFlag));
         }
         return listKline;
     }
@@ -530,12 +552,12 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
      * @param current
      * @return
      */
-    private BigDecimal getNewLow(GupiaoKline before, GupiaoKline current){
+    private BigDecimal getNewLow(GupiaoKline before, GupiaoKline current, int trendFlag){
         if (current.getLow().compareTo(before.getNewLow()) > 0) {
-            if (current.getHigh().compareTo(before.getNewHigh()) >= 0) {
+            if (current.getHigh().compareTo(before.getNewHigh()) > 0) {
                 return current.getLow();
             }
-            if (before.getTrend()==1) {
+            if (trendFlag==1) {
                 return current.getLow();
             }
             return before.getNewLow();
@@ -547,13 +569,12 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
         ////////////今天最低小于昨天最低////////////////
 
-        if (current.getHigh().compareTo(before.getNewHigh()) > 0){  //今天最高 > 昨天最高
-            if (before.getTrend()==0){
+        if (current.getHigh().compareTo(before.getNewHigh()) >= 0){  //今天最高 > 昨天最高
+            if (trendFlag==0){
                 return current.getLow();
             }
             return before.getNewLow();
         }
-        ////////////今天最高 == 昨天最高/////////
         ////////////今天最高 < 昨天最高//////////
         return current.getLow();
     }
@@ -564,14 +585,14 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
      * @param current
      * @return
      */
-    private BigDecimal getNewHigh(GupiaoKline before, GupiaoKline current){
+    private BigDecimal getNewHigh(GupiaoKline before, GupiaoKline current, int trendFlag){
         if (current.getHigh().compareTo(before.getNewHigh()) > 0) { //今天最高大于昨天最高
             ////////////////今天最低大于等于昨天最低////////////////
-            if (current.getLow().compareTo(before.getNewLow()) >= 0) {
+            if (current.getLow().compareTo(before.getNewLow()) > 0) {
                 return current.getHigh();
             }
-             ////////////////今天最低小于昨天最低//////////////////
-            if (before.getTrend()==1) {
+             ////////////////今天最低小于等于昨天最低//////////////////
+            if (trendFlag == 1) {
                 return current.getHigh();
             }
             return before.getNewHigh();
@@ -582,13 +603,12 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         }
 
         ////////////今天最高小于昨天最高////////////////
-        if (current.getLow().compareTo(before.getNewLow()) > 0){ //今天最低大于昨天最低
-            if (before.getTrend()==0){
+        if (current.getLow().compareTo(before.getNewLow()) >= 0){ //今天最低大于等于昨天最低
+            if (trendFlag == 0){
                 return current.getHigh();
             }
             return before.getNewHigh();
         }
-        ////////////今天最低==昨天最低////////
         ////////////今天最低 < 昨天最低//////////
         return current.getHigh();
     }
@@ -600,29 +620,41 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
      * @return
      */
     private boolean isUpByMerge(GupiaoKline before, GupiaoKline current){
-        if (current.getHigh().compareTo(before.getMergeHigh()) > 0) { //今天最高大于昨天最高
-            if (current.getLow().compareTo(before.getMergeLow()) >= 0) { //今天最低大于等于昨天最低
+        if (current.getNewHigh().compareTo(before.getMergeHigh()) > 0) { //今天最高大于昨天最高
+            if (current.getNewLow().compareTo(before.getMergeLow()) >= 0) { //今天最低大于等于昨天最低
                 return true;
             }
-            if (current.getLow().compareTo(before.getMergeLow()) < 0
+            if (current.getNewLow().compareTo(before.getMergeLow()) < 0
                     && before.getYiTrend()==1) { //今天最低小于昨天最低
+                log.info("xxxxxxxxxxxxxxx");
+                log.info(before.toString());
+                log.info(current.toString());
                 return true;
             }
         }
 
-        if (current.getHigh().compareTo(before.getMergeHigh()) == 0){   //今天最高==昨天最高
-            if (current.getLow().compareTo(before.getMergeLow()) > 0){
+        if (current.getNewHigh().compareTo(before.getMergeHigh()) == 0){   //今天最高==昨天最高
+            if (current.getNewLow().compareTo(before.getMergeLow()) > 0){
+                log.info("xxxxxxxxxxxxxxx");
+                log.info(before.toString());
+                log.info(current.toString());
                 return true;
             }
-            if ((current.getLow().compareTo(before.getMergeLow()) == 0)
+            if ((current.getNewLow().compareTo(before.getMergeLow()) == 0)
                     && before.getYiTrend()==1){ //今天最低==昨天最低
+                log.info("xxxxxxxxxxxxxxx");
+                log.info(before.toString());
+                log.info(current.toString());
                 return true;
             }
         }
 
-        if ((current.getHigh().compareTo(before.getMergeHigh()) < 0 //今天最高小于昨天最高
-                && current.getLow().compareTo(before.getMergeLow()) > 0)
+        if ((current.getNewHigh().compareTo(before.getMergeHigh()) < 0 //今天最高小于昨天最高
+                && current.getNewLow().compareTo(before.getMergeLow()) > 0)
                 && before.getYiTrend()==1){ //今天最低大于昨天最低
+            log.info("xxxxxxxxxxxxxxx");
+            log.info(before.toString());
+            log.info(current.toString());
             return true;
         }
 
@@ -635,30 +667,25 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
      * @param current
      * @return
      */
-    private boolean isUp(GupiaoKline before, GupiaoKline current){
+    private boolean isUp(GupiaoKline before, GupiaoKline current, int trendFlag){
         if (current.getHigh().compareTo(before.getNewHigh()) > 0) { //今天最高大于昨天最高
-            if (current.getLow().compareTo(before.getNewLow()) >= 0) { //今天最低大于等于昨天最低
+            if (current.getLow().compareTo(before.getNewLow()) > 0) { //今天最低大于昨天最低
                 return true;
             }
-            if (current.getLow().compareTo(before.getNewLow()) < 0
-                    && before.getTrend()==1) { //今天最低小于昨天最低
+            if (current.getLow().compareTo(before.getNewLow()) <= 0
+                    && trendFlag == 1) { //今天最低小于昨天最低
                 return true;
             }
         }
 
-        if (current.getHigh().compareTo(before.getNewHigh()) == 0){   //今天最高==昨天最高
-            if (current.getLow().compareTo(before.getNewLow()) > 0){
-                return true;
-            }
-            if ((current.getLow().compareTo(before.getNewLow()) == 0)
-                    && before.getTrend()==1){ //今天最低==昨天最低
-                return true;
-            }
+        if (current.getHigh().compareTo(before.getNewHigh()) == 0
+                && trendFlag == 1){   //今天最高==昨天最高
+           return true;
         }
 
         if ((current.getHigh().compareTo(before.getNewHigh()) < 0 //今天最高小于昨天最高
-                && current.getLow().compareTo(before.getNewLow()) > 0)
-                && before.getTrend()==1){ //今天最低大于昨天最低
+                && current.getLow().compareTo(before.getNewLow()) >= 0)
+                && trendFlag == 1){ //今天最低大于昨天最低
             return true;
         }
 
@@ -793,222 +820,4 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
     }
 
-//    /****
-//     *  判断是否上升趋势
-//     * @param before
-//     * @param current
-//     * @return
-//     */
-//
-//    private boolean isUpTrend(GupiaoKline before, GupiaoKline current){
-//        if ((current.getHigh().compareTo(before.getNewHigh()) > 0 //今天最高大于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) >= 0)){ //今天最低大于等于昨天最低
-//            current.setNewHigh(current.getHigh());
-//            current.setNewLow(current.getLow());
-//
-//            current.setBeforeDate(before.getBizDate());
-//            current.setAfterDate(current.getBizDate());
-//            current.setIsMerge(1);
-//            return true;
-//        }
-//        if ((current.getHigh().compareTo(before.getNewHigh()) == 0  //今天最高等于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) > 0)){  //今天最低大于昨天最低
-//            current.setNewHigh(current.getHigh());
-//            current.setNewLow(current.getLow());
-//
-//            current.setBeforeDate(before.getBeforeDate()); //取前1天的before值
-//            current.setAfterDate(current.getBizDate());
-//            before.setIsMerge(0); //昨天无效
-//            current.setIsMerge(1); //今天保留
-//            return true;
-//        }
-//
-//
-//
-//        if ((current.getHigh().compareTo(before.getNewHigh()) > 0 //今天最高大于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) < 0)){ //今天最低小于昨天最低
-//
-//            if (before.getTrend()==1) {
-//                current.setNewHigh(current.getHigh());
-//                current.setNewLow(before.getNewLow());
-//
-//                current.setBeforeDate(before.getBeforeDate()); //取前1天的before值
-//                current.setAfterDate(current.getBizDate());
-//
-//                before.setIsMerge(0); //昨天无效
-//                current.setIsMerge(1); //今天保留
-//                return true;
-//            }
-//            /////////////////////////////////  下降判断  ////////////////////////////////////////
-//            current.setNewHigh(before.getNewHigh());
-//            current.setNewLow(current.getLow());
-//
-//            current.setBeforeDate(before.getBeforeDate()); //取前1天的before值
-//            current.setAfterDate(current.getBizDate());
-//
-//            before.setIsMerge(0); //昨天无效
-//            current.setIsMerge(1); //今天保留
-//            return false;
-//        }
-//
-//        if ((current.getHigh().compareTo(before.getNewHigh()) < 0 //今天最高小于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) > 0)){ //今天最低大于昨天最低
-//            if (before.getTrend()==1) {
-//                current.setNewHigh(before.getNewHigh());
-//                current.setNewLow(current.getLow());
-//
-//                current.setBeforeDate(before.getBeforeDate()); //取前1天的before值
-//                current.setAfterDate(current.getBizDate());
-//
-//                before.setIsMerge(0); //昨天无效
-//                current.setIsMerge(1); //今天保留
-//                return true;
-//            }
-//            /////////////////////////////////  下降判断  ////////////////////////////////////////
-//            current.setNewHigh(current.getHigh());
-//            current.setNewLow(before.getNewLow());
-//
-//            current.setBeforeDate(before.getBeforeDate()); //取前1天的before值
-//            current.setAfterDate(current.getBizDate());
-//
-//            before.setIsMerge(0); //昨天无效
-//            current.setIsMerge(1); //今天保留
-//            return false;
-//        }
-//
-//
-//        /////////////////////////////////  下降判断  ////////////////////////////////////////
-//        if ((current.getHigh().compareTo(before.getNewHigh()) <= 0 //今天最高小于等于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) < 0)){ //今天最低小于昨天最低
-//            current.setNewHigh(current.getHigh());
-//            current.setNewLow(current.getLow());
-//
-//            current.setBeforeDate(before.getBizDate());
-//            current.setAfterDate(current.getBizDate());
-//
-//            current.setIsMerge(1); //今天保留
-//            return false;
-//        }
-//        /////////////////////////////////  下降判断  ///////////////////////////////包含/////////
-//        if ((current.getHigh().compareTo(before.getNewHigh()) < 0 //今天最高小于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) == 0)){ //今天最低等于昨天最低
-//            current.setNewHigh(current.getHigh());
-//            current.setNewLow(current.getLow());
-//
-//            current.setBeforeDate(before.getBeforeDate()); //取前1天的before值
-//            current.setAfterDate(current.getBizDate());
-//
-//            before.setIsMerge(0); //昨天无效
-//            current.setIsMerge(1); //今天保留
-//            return false;
-//        }
-//
-//        //昨天和今天一样的情况
-//        current.setNewHigh(current.getHigh());
-//        current.setNewLow(current.getLow());
-//
-//        current.setBeforeDate(before.getBeforeDate()); //取前1天的before值
-//        current.setAfterDate(current.getBizDate());
-//
-//        before.setIsMerge(0); //昨天无效
-//        current.setIsMerge(1); //今天保留
-//        if (before.getTrend()==1) {
-//            return true;
-//        }
-//        return false;
-//    }
-
-
-//
-//    private boolean  isUpTrendBaohan(GupiaoKline before, GupiaoKline current){
-//        if ((current.getHigh().compareTo(before.getNewHigh()) > 0 //今天最高大于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) >= 0)){ //今天最低大于等于昨天最低
-//            current.setNewHigh(current.getHigh());
-//            current.setNewLow(current.getLow());
-//            current.setIsMerge(1);
-//            return true;
-//        }
-//        if ((current.getHigh().compareTo(before.getNewHigh()) == 0  //今天最高等于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) > 0)){  //今天最低大于昨天最低
-//            current.setNewHigh(current.getHigh());
-//            current.setNewLow(current.getLow());
-//
-//            before.setIsMerge(0); //昨天无效
-//            current.setIsMerge(1); //今天保留
-//            return true;
-//        }
-//
-//
-//
-//        if ((current.getHigh().compareTo(before.getNewHigh()) > 0 //今天最高大于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) < 0)){ //今天最低小于昨天最低
-//
-//            if (before.getTrend()==1) {
-//                current.setNewHigh(current.getHigh());
-//                current.setNewLow(before.getNewLow());
-//
-//                before.setIsMerge(0); //昨天无效
-//                current.setIsMerge(1); //今天保留
-//                return true;
-//            }
-//            /////////////////////////////////  下降判断  ////////////////////////////////////////
-//            current.setNewHigh(before.getNewHigh());
-//            current.setNewLow(current.getLow());
-//
-//            before.setIsMerge(0); //昨天无效
-//            current.setIsMerge(1); //今天保留
-//            return false;
-//        }
-//
-//        if ((current.getHigh().compareTo(before.getNewHigh()) < 0 //今天最高小于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) > 0)){ //今天最低大于昨天最低
-//            if (before.getTrend()==1) {
-//                current.setNewHigh(before.getNewHigh());
-//                current.setNewLow(current.getLow());
-//
-//                before.setIsMerge(0); //昨天无效
-//                current.setIsMerge(1); //今天保留
-//                return true;
-//            }
-//            /////////////////////////////////  下降判断  ////////////////////////////////////////
-//            current.setNewHigh(current.getHigh());
-//            current.setNewLow(before.getNewLow());
-//
-//            before.setIsMerge(0); //昨天无效
-//            current.setIsMerge(1); //今天保留
-//            return false;
-//        }
-//
-//
-//        /////////////////////////////////  下降判断  ////////////////////////////////////////
-//        if ((current.getHigh().compareTo(before.getNewHigh()) <= 0 //今天最高小于等于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) < 0)){ //今天最低小于昨天最低
-//            current.setNewHigh(current.getHigh());
-//            current.setNewLow(current.getLow());
-//
-//            current.setIsMerge(1); //今天保留
-//            return false;
-//        }
-//        /////////////////////////////////  下降判断  ///////////////////////////////包含/////////
-//        if ((current.getHigh().compareTo(before.getNewHigh()) < 0 //今天最高小于昨天最高
-//                && current.getLow().compareTo(before.getNewLow()) == 0)){ //今天最低等于昨天最低
-//            current.setNewHigh(current.getHigh());
-//            current.setNewLow(current.getLow());
-//
-//            before.setIsMerge(0); //昨天无效
-//            current.setIsMerge(1); //今天保留
-//            return false;
-//        }
-//
-//        //昨天和今天一样的情况
-//        current.setNewHigh(current.getHigh());
-//        current.setNewLow(current.getLow());
-//
-//        before.setIsMerge(0); //昨天无效
-//        current.setIsMerge(1); //今天保留
-//        if (before.getTrend()==1) {
-//            return true;
-//        }
-//        return false;
-//    }
 }
