@@ -73,9 +73,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         List<String> list = gupiaoKlineRepository.listKzz();
         for (String symbol : list){
             try {
-                if(!"127015".equals(symbol)){
-                    continue;
-                }
+//                if(!"127015".equals(symbol)){
+//                    continue;
+//                }
                 Runnable run = new GupiaoXinhaoManagerImpl.CalculateZjrcRunnable(symbol, period);
                 ExecutorProcessPool.getInstance().executeByCustomThread(run);
                 Runnable run1 = new GupiaoXinhaoManagerImpl.CalculateTrendRunnable(symbol, period);
@@ -188,7 +188,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             return;
         }
         Collections.reverse(listKline); // 反转lists
-        calculateBase(listKline); //根据初步趋势线(trend),处理包含关系,计算出(NewHigh,NewLow)
+        calculateBase(listKline); //根据初步趋势线(trend),处理包含关系,计算出(NewHigh,NewLow,IsMerge)
         List<GupiaoKline> listDistinct = listKline.stream().filter(t->t.getIsMerge()==1).collect(Collectors.toList()); //去掉包含关系的K线集合
         calculateBaseByMerge(listDistinct); //重新计算得出趋势线(yi_trend)
         Map<String, GupiaoKline> map = calculateDingDiByMerge(listDistinct); //根据(yi_trend)进行计算趋势
@@ -393,9 +393,11 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
     private Map<String, GupiaoKline> calculateDingDiByMerge(List<GupiaoKline> listDistinct ){
         int dingNum = 0;
         BigDecimal highPrice = new BigDecimal(0);
+        BigDecimal highPrice_low = new BigDecimal(0); //检查成笔用的
 
         int diNum = 0 ;
         BigDecimal lowPrice = new BigDecimal(0);
+        BigDecimal lowPrice_high = new BigDecimal(0); //检查成笔用的
 
         boolean isDing = true;
         for (int i = 0; i < listDistinct.size(); i++) {
@@ -407,21 +409,28 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             GupiaoKline before = listDistinct.get(i-1);
             GupiaoKline current = listDistinct.get(i);
 
-            if (previous.getYiTrend()==1
-                    && before.getYiTrend()==1
-                    && current.getYiTrend()==0 && (i-1-diNum)>=4){ //110为顶分型，且距离上次底大于4根k线
+            if (((previous.getYiTrend()==1 && before.getYiTrend()==1 && current.getYiTrend()==0)
+                    || (previous.getYiTrend()==0 && before.getYiTrend()==1 && current.getYiTrend()==0))
+                    && (i-1-diNum)>=4 //110或010为顶分型，且距离上次底大于4根k线
+                    && before.getMergeHigh().compareTo(lowPrice_high) > 0){
                 if (isDing && highPrice.compareTo(before.getMergeHigh())>0){//上次也是顶,上次>本次最高价
                     continue;
                 }
                 dingNum = i-1;
                 highPrice = before.getMergeHigh();
                 isDing = true;
+                if (previous.getMergeLow().compareTo(current.getMergeLow())<0){ //谁低取谁
+                    highPrice_low = previous.getMergeLow();
+                } else {
+                    highPrice_low = current.getMergeLow();
+                }
                 yiBiSure(diNum, dingNum, highPrice, lowPrice, listDistinct,1); //向上一笔确认
             }
 
-            if (previous.getYiTrend()==0
-                    && before.getYiTrend()==0
-                    && current.getYiTrend()==1 && (i-1-dingNum)>=4){ //001为底分型，且距离上次顶大于4根k线
+            if (((previous.getYiTrend()==0 && before.getYiTrend()==0 && current.getYiTrend()==1)
+                    || (previous.getYiTrend()==1 && before.getYiTrend()==0 && current.getYiTrend()==1))
+                    && (i-1-dingNum)>=4  //001或101为底分型，且距离上次顶大于4根k线
+                    && before.getMergeLow().compareTo(highPrice_low) < 0){ //底分型的最低要低于上次的顶分型区间
                 if (!isDing && lowPrice.compareTo(before.getMergeLow())<0){ //上次也是底,上次<本次最低价
                     current.setPc("1"); //双底,当前底比上一个底要高
                     continue;
@@ -432,6 +441,11 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 diNum = i-1;
                 lowPrice = before.getMergeLow();
                 isDing = false;
+                if (previous.getMergeHigh().compareTo(current.getMergeHigh())>0){ //谁高取谁
+                    lowPrice_high = previous.getMergeHigh();
+                } else {
+                    lowPrice_high = current.getMergeHigh();
+                }
                 yiBiSure(dingNum, diNum, highPrice, lowPrice, listDistinct,0); //向下一笔确认
             }
 
@@ -474,15 +488,15 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
     }
 
     private List<GupiaoKline> calculateBaseByMerge(List<GupiaoKline> listKline){
-        int trendFlag = 0;
+//        int trendFlag = 0;
         for (int i = 0; i < listKline.size(); i++) {
             if (i == 0) {
                 firstKlineByMerge(listKline); //首根逻辑
                 continue;
             }
-            if (i-2 >= 0){ //且包含处理后为有效时,进行更新
-                trendFlag = listKline.get(i-2).getTrend(); //往前第2根走势
-            }
+//            if (i-2 >= 0){ //且包含处理后为有效时,进行更新
+//                trendFlag = listKline.get(i-2).getTrend(); //往前第2根走势
+//            }
             GupiaoKline before = listKline.get(i-1); //前一根
             GupiaoKline current = listKline.get(i); //当前根
 
@@ -496,33 +510,112 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         return listKline;
     }
 
+//    /***
+//     * 计算趋势的首根处理
+//     * @param listKline
+//     */
+//    private void firstCalculateTrend(List<GupiaoKline> listKline){
+//        if (!ComUtil.isEmpty(listKline.get(0).getTrend())) { //已计算,不需要处理
+//            return;
+//        }
+//        listKline.get(0).setTrend(0); //如果第一条记录的趋势为空,则为下降处理
+//        listKline.get(0).setAveragePrice(listKline.get(0).getHigh()
+//                .add(listKline.get(0).getLow()).divide(new BigDecimal(2)));//均价
+//    }
 
 
     /**
      * 第一根处理逻辑
-     * @param listKline
+     * @param kline
      */
-    private void firstKline(List<GupiaoKline> listKline){
-        if (!ComUtil.isEmpty(listKline.get(0).getTrend())) { //已计算,不需要处理
+    private void firstKline(GupiaoKline kline){
+        if (!ComUtil.isEmpty(kline.getTrend())) { //已计算,不需要处理
             return;
         }
-        listKline.get(0).setTrend(0); //如果第一条记录的趋势为空,则为下降处理
+        kline.setTrend(0); //如果第一条记录的趋势为空,则为下降处理
+//        kline.setAveragePrice(kline.getHigh()
+//                .add(kline.getLow()).divide(new BigDecimal(2)));//均价
 
-        listKline.get(0).setNewHigh(listKline.get(0).getHigh());
-        listKline.get(0).setNewLow(listKline.get(0).getLow());
-        listKline.get(0).setIsMerge(1); //有效
+        kline.setNewHigh(kline.getHigh());
+        kline.setNewLow(kline.getLow());
+        kline.setIsMerge(1); //有效
 
-        listKline.get(0).setBeforeDate(listKline.get(0).getBizDate());
-        listKline.get(0).setAfterDate(listKline.get(0).getBizDate());
+        kline.setBeforeDate(kline.getBizDate());
+        kline.setAfterDate(kline.getBizDate());
     }
 
+//    /****
+//     * 计算趋势参数
+//     * @param listKline
+//     * @return
+//     */
+//    private List<GupiaoKline> calculateTrend(List<GupiaoKline> listKline){
+//        int trendFlag = 0;
+//        for (int i = 0; i < listKline.size(); i++) {
+//            if (i == 0) {
+//                firstCalculateTrend(listKline); //首根逻辑
+//                continue;
+//            }
+//            if ("2021-09-27 15:00".equals(listKline.get(i).getBizDate())){
+//                log.info("");
+//            }
+////            if (i-2 >= 0 && listKline.get(i-2).getIsMerge()==1){ //且包含处理后为有效时,进行更新
+////                trendFlag = listKline.get(i-2).getTrend(); //往前第2根走势
+////            }
+//
+//            GupiaoKline before = listKline.get(i-1); //前一根
+////            trendFlag = before.getTrend(); //往前第1根走势
+//            if (before.getIsMerge()==1){ //且包含处理后为有效时,进行更新
+//                trendFlag = before.getTrend(); //往前第1根走势
+//            }
+//            GupiaoKline current = listKline.get(i); //当前根
+//
+//            current.setTrend(0);//设置为 false
+//            if (isUp(before, current, trendFlag)){ //判断是否为上升趋势
+//                current.setTrend(1);
+//            }
+//            current.setIsMerge(1);//设置为 false
+//            if (isMerge(before, current)){ //判断是否存在包含
+//                before.setIsMerge(0);//前一天设置为无效
+//            }
+//            current.setNewHigh(getNewHigh(before, current, trendFlag));
+//            current.setNewLow(getNewLow(before, current, trendFlag));
+//        }
+//        return listKline;
+//    }
+//
+//    private Integer getTrend(Integer i, List<GupiaoKline> listKline){
+//        GupiaoKline before = listKline.get(i-1); //前一根
+//        before.setAveragePrice(before.getNewHigh()
+//                .add(before.getNewLow()).divide(new BigDecimal(2)));//均价
+//        GupiaoKline current = listKline.get(i); //当前根
+//        current.setAveragePrice(current.getHigh()
+//                .add(current.getLow()).divide(new BigDecimal(2)));//均价
+//        if (i==1){
+//            if(current.getAveragePrice().compareTo(before.getAveragePrice())>0){
+//                return 1;
+//            }
+//            return 0;
+//        }
+//        GupiaoKline nextBefore = listKline.get(i-2); //前2根
+//        nextBefore.setAveragePrice(nextBefore.getNewHigh()
+//                .add(nextBefore.getNewLow()).divide(new BigDecimal(2)));//均价
+//        if(current.getAveragePrice().compareTo(nextBefore.getAveragePrice())>0){
+//            return 1;
+//        }
+//        return 0;//设置为 false
+//    }
     private List<GupiaoKline> calculateBase(List<GupiaoKline> listKline){
         int trendFlag = 0;
         for (int i = 0; i < listKline.size(); i++) {
             if (i == 0) {
-                firstKline(listKline); //首根逻辑
+                firstKline(listKline.get(0)); //首根逻辑
                 continue;
             }
+
+//            if ("2021-09-27 15:00".equals(listKline.get(i).getBizDate())){
+//                log.info("");
+//            }
 //            if (i-2 >= 0 && listKline.get(i-2).getIsMerge()==1){ //且包含处理后为有效时,进行更新
 //                trendFlag = listKline.get(i-2).getTrend(); //往前第2根走势
 //            }
@@ -531,11 +624,15 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             trendFlag = before.getTrend(); //往前第1根走势
 
             GupiaoKline current = listKline.get(i); //当前根
+//            current.setAveragePrice(current.getHigh()
+//                    .add(current.getLow()).divide(new BigDecimal(2)));//均价
+//            current.setTrend(getTrend(i, listKline));//判断趋势
 
             current.setTrend(0);//设置为 false
             if (isUp(before, current, trendFlag)){ //判断是否为上升趋势
                 current.setTrend(1);
             }
+
             current.setIsMerge(1);//设置为 false
             if (isMerge(before, current)){ //判断是否存在包含
                 before.setIsMerge(0);//前一天设置为无效
