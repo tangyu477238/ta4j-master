@@ -3,10 +3,7 @@ package com.chuancai.tfish.manager.impl;
 import com.chuancai.tfish.enums.KlineEnum;
 import com.chuancai.tfish.manager.GupiaoXinhaoManager;
 import com.chuancai.tfish.model.*;
-import com.chuancai.tfish.repository.GupiaoKline30mRepository;
-import com.chuancai.tfish.repository.GupiaoKline5mRepository;
-import com.chuancai.tfish.repository.GupiaoKlineRepository;
-import com.chuancai.tfish.repository.GupiaoXinhaoRepository;
+import com.chuancai.tfish.repository.*;
 import com.chuancai.tfish.strategy.KzzStrategy;
 import com.chuancai.tfish.util.ComUtil;
 import com.chuancai.tfish.util.DateTimeUtil;
@@ -40,6 +37,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
     @Resource
     private GupiaoKline5mRepository gupiaoKline5mRepository; //获取5k线对象
+
+    @Resource
+    private GupiaoKline15mRepository gupiaoKline15mRepository; //获取15k线对象
 
     @Resource
     private GupiaoKline30mRepository gupiaoKline30mRepository; //获取30k线对象
@@ -197,110 +197,10 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         log.info(period+"-------calculateTrend数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
     }
 
-    //确认方向上的一笔
-    private void yiBiSure(int start, int end, BigDecimal highPrice, BigDecimal lowPrice, List<GupiaoKline> listDistinct, int trend){
 
-        updateTrendKline(start,end,highPrice,lowPrice,listDistinct,trend);
-
-
-//        BigDecimal UpPrice5 = new BigDecimal(0);
-//        BigDecimal UpPrice4 = new BigDecimal(0);
-//        BigDecimal UpPrice3 = new BigDecimal(0);
-//        BigDecimal UpPrice2 = new BigDecimal(0);
-//
-//        BigDecimal DownPrice5 = new BigDecimal(0);
-//        BigDecimal DownPrice4 = new BigDecimal(0);
-//        BigDecimal DownPrice3 = new BigDecimal(0);
-//        BigDecimal DownPrice2 = new BigDecimal(0);
-//        String beforeDate = "";
-//        String afterDate = "";
-//        String beforeDate2 = "";
-//        String afterDate2 = "";
-//        String beforeDate3 = "";
-//        String afterDate3 = "";
-//        String beforeDate4 = "";
-//        String afterDate4 = "";
-//        String beforeDate5 = "";
-//        String afterDate5 = "";
-//        if(!ComUtil.isEmpty(listDistinct.get(start))){
-//            DownPrice5 = listDistinct.get(start).getDownPrice5();
-//            UpPrice5 = listDistinct.get(start).getUpPrice5();
-//            DownPrice4 = listDistinct.get(start).getDownPrice4();
-//            UpPrice4 = listDistinct.get(start).getUpPrice4();
-//            DownPrice3 = listDistinct.get(start).getDownPrice3();
-//            UpPrice3 = listDistinct.get(start).getUpPrice3();
-//            DownPrice2 = listDistinct.get(start).getDownPrice2();
-//            UpPrice2 = listDistinct.get(start).getUpPrice2();
-//
-//            if (trend==0){
-//                DownPrice5 = listDistinct.get(start).getDownPrice4();
-//                DownPrice4 = listDistinct.get(start).getDownPrice3();
-//                DownPrice3 = listDistinct.get(start).getDownPrice2();
-//                DownPrice2 = listDistinct.get(start).getDownPrice1();
-//            } else {
-//                UpPrice5 = listDistinct.get(start).getUpPrice4();
-//                UpPrice4 = listDistinct.get(start).getUpPrice3();
-//                UpPrice3 = listDistinct.get(start).getUpPrice2();
-//                UpPrice2 = listDistinct.get(start).getUpPrice1();
-//            }
-//
-//            beforeDate = listDistinct.get(start).getBeforeDate();
-//            afterDate = listDistinct.get(start).getAfterDate();
-//            beforeDate2 = listDistinct.get(start).getBeforeDate2();
-//            afterDate2 = listDistinct.get(start).getAfterDate2();
-//            beforeDate3 = listDistinct.get(start).getBeforeDate3();
-//            afterDate3 = listDistinct.get(start).getAfterDate3();
-//            beforeDate4 = listDistinct.get(start).getBeforeDate4();
-//            afterDate4 = listDistinct.get(start).getAfterDate4();
-//            beforeDate5 = listDistinct.get(start).getBeforeDate5();
-//            afterDate5 = listDistinct.get(start).getAfterDate5();
-//
-//            if (trend==0) {
-//                afterDate5 = listDistinct.get(start).getAfterDate4();
-//                afterDate4 = listDistinct.get(start).getAfterDate3();
-//                afterDate3 = listDistinct.get(start).getAfterDate2();
-//                afterDate2 = listDistinct.get(start).getAfterDate();
-//                afterDate = listDistinct.get(start).getBizDate();
-//            } else {
-//                beforeDate5 = listDistinct.get(start).getBeforeDate4();
-//                beforeDate4 = listDistinct.get(start).getBeforeDate3();
-//                beforeDate3 = listDistinct.get(start).getBeforeDate2();
-//                beforeDate2 = listDistinct.get(start).getBeforeDate();
-//                beforeDate = listDistinct.get(start).getBizDate();
-//            }
-//        }
-//        for (int i = start+1; i<=end; i++){
-//            listDistinct.get(i).setYiTrend(trend);
-//            listDistinct.get(i).setYiHigh(highPrice);
-//            listDistinct.get(i).setYiLow(lowPrice);
-//
-//            listDistinct.get(i).setUpPrice5(UpPrice5);
-//            listDistinct.get(i).setDownPrice5(DownPrice5);
-//            listDistinct.get(i).setUpPrice4(UpPrice4);
-//            listDistinct.get(i).setDownPrice4(DownPrice4);
-//            listDistinct.get(i).setUpPrice3(UpPrice3);
-//            listDistinct.get(i).setDownPrice3(DownPrice3);
-//            listDistinct.get(i).setUpPrice2(UpPrice2);
-//            listDistinct.get(i).setDownPrice2(DownPrice2);
-//
-//            listDistinct.get(i).setUpPrice1(highPrice);
-//            listDistinct.get(i).setDownPrice1(lowPrice);
-//
-//            listDistinct.get(i).setBeforeDate(beforeDate);
-//            listDistinct.get(i).setAfterDate(afterDate);
-//            listDistinct.get(i).setBeforeDate2(beforeDate2);
-//            listDistinct.get(i).setAfterDate2(afterDate2);
-//            listDistinct.get(i).setBeforeDate3(beforeDate3);
-//            listDistinct.get(i).setAfterDate3(afterDate3);
-//            listDistinct.get(i).setBeforeDate4(beforeDate4);
-//            listDistinct.get(i).setAfterDate4(afterDate4);
-//            listDistinct.get(i).setBeforeDate5(beforeDate5);
-//            listDistinct.get(i).setAfterDate5(afterDate5);
-//        }
-    }
 
     /**
-     *
+     * 确认方向上的一笔
      * @param start
      * @param end
      * @param highPrice
@@ -308,7 +208,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
      * @param listDistinct
      * @param trend
      */
-    private void updateTrendKline(int start, int end,BigDecimal highPrice, BigDecimal lowPrice, List<GupiaoKline> listDistinct, int trend){
+    private void yiBiSure(int start, int end,BigDecimal highPrice, BigDecimal lowPrice, List<GupiaoKline> listDistinct, int trend){
         TrendDTO trendDTO = new TrendDTO();
         BeanUtils.copyProperties(listDistinct.get(start), trendDTO); //上一轮得基础数据复制过来
         for (int i = start+1; i<=end; i++){
@@ -809,107 +709,64 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         return true;
     }
 
+    void save5mKline(List<GupiaoKline> listKline){
+        List<String> bizDate = gupiaoKlineRepository.listKlineBizDate5m(listKline.get(0).getSymbol());
+        List<GupiaoKline5m> list = listKline.stream()
+                .filter(x -> bizDate.contains(x.getBizDate()))
+                .map(t -> {
+                    GupiaoKline5m gupiaoKline5m = new GupiaoKline5m();
+                    BeanUtils.copyProperties(t, gupiaoKline5m);
+                    return gupiaoKline5m;
+                })
+                .collect(Collectors.toList());
+        gupiaoKline5mRepository.saveAll(list); //保存新增数据
+    }
 
-//
-//
-//
-//    private List<GupiaoKline>  listTrendKline(List<GupiaoKline> listKline){
-//        for (int i = 0; i < listKline.size(); i++) {
-//            if (i == 0) {
-//                firstKline(listKline); //首根逻辑
-//                continue;
-//            }
-//            GupiaoKline before = listKline.get(i-1); //前一根
-//            GupiaoKline current = listKline.get(i); //当前根
-//
-//            if (isUpTrend(before, current)){ //判断是否上升
-//                current.setTrend(1);
-//                if (before.getTrend()==0){
-//                    current.setUpPrice5(before.getUpPrice4());
-//                    current.setDownPrice5(before.getDownPrice4());
-//                    current.setUpPrice4(before.getUpPrice3());
-//                    current.setDownPrice4(before.getDownPrice3());
-//                    current.setUpPrice3(before.getUpPrice2());
-//                    current.setDownPrice3(before.getDownPrice2());
-//                    current.setUpPrice2(before.getUpPrice1());
-//                    current.setDownPrice2(before.getDownPrice1());
-//                } else {
-//                    current.setUpPrice5(before.getUpPrice5());
-//                    current.setDownPrice5(before.getDownPrice5());
-//                    current.setUpPrice4(before.getUpPrice4());
-//                    current.setDownPrice4(before.getDownPrice4());
-//                    current.setUpPrice3(before.getUpPrice3());
-//                    current.setDownPrice3(before.getDownPrice3());
-//                    current.setUpPrice2(before.getUpPrice2());
-//                    current.setDownPrice2(before.getDownPrice2());
-//                }
-//                current.setUpPrice1(current.getNewHigh());
-//                current.setDownPrice1(before.getDownPrice1()); //低价保持不变
-//
-//                continue;
-//            }
-//            current.setTrend(0);
-//            if (before.getTrend()==1){
-//                current.setUpPrice5(before.getUpPrice4());
-//                current.setDownPrice5(before.getDownPrice4());
-//                current.setUpPrice4(before.getUpPrice3());
-//                current.setDownPrice4(before.getDownPrice3());
-//                current.setUpPrice3(before.getUpPrice2());
-//                current.setDownPrice3(before.getDownPrice2());
-//                current.setUpPrice2(before.getUpPrice1());
-//                current.setDownPrice2(before.getDownPrice1());
-//            } else {
-//                current.setUpPrice5(before.getUpPrice5());
-//                current.setDownPrice5(before.getDownPrice5());
-//                current.setUpPrice4(before.getUpPrice4());
-//                current.setDownPrice4(before.getDownPrice4());
-//                current.setUpPrice3(before.getUpPrice3());
-//                current.setDownPrice3(before.getDownPrice3());
-//                current.setUpPrice2(before.getUpPrice2());
-//                current.setDownPrice2(before.getDownPrice2());
-//            }
-//            current.setUpPrice1(before.getUpPrice1());//高价保持不变
-//            current.setDownPrice1(current.getNewLow());
-//
-//
-//        }
-//        return listKline;
-//    }
+    void save15mKline(List<GupiaoKline> listKline){
+        List<String> bizDate = gupiaoKlineRepository.listKlineBizDate15m(listKline.get(0).getSymbol());
+        List<GupiaoKline15m> list = listKline.stream()
+                .filter(x -> bizDate.contains(x.getBizDate()))
+                .map(t -> {
+                    GupiaoKline15m gupiaoKline15m = new GupiaoKline15m();
+                    BeanUtils.copyProperties(t, gupiaoKline15m);
+                    return gupiaoKline15m;
+                })
+                .collect(Collectors.toList());
+        gupiaoKline15mRepository.saveAll(list); //保存新增数据
+    }
 
+
+    void save30mKline(List<GupiaoKline> listKline){
+        List<String> bizDate = gupiaoKlineRepository.listKlineBizDate30m(listKline.get(0).getSymbol());
+        List<GupiaoKline30m> list = listKline.stream()
+                .filter(x -> bizDate.contains(x.getBizDate()))
+                .map(t -> {
+                    GupiaoKline30m gupiaoKline30m = new GupiaoKline30m();
+                    BeanUtils.copyProperties(t, gupiaoKline30m);
+                    return gupiaoKline30m;
+                }).collect(Collectors.toList());
+        gupiaoKline30mRepository.saveAll(list); //保存新增数据
+    }
 
 
     private void saveKline(List<GupiaoKline> listKline){
-        Date date1 = new Date();
         if (ComUtil.isEmpty(listKline)){
             return;
         }
-
         if (listKline.get(0).getPeriod()== KlineEnum.K_5M.getId()){
-            List<String> bizDate = gupiaoKlineRepository.listKlineBizDate5m(listKline.get(0).getSymbol());
-            List<GupiaoKline5m> list = listKline.stream()
-                    .filter(x -> bizDate.contains(x.getBizDate()))
-                    .map(t -> {
-                        GupiaoKline5m gupiaoKline5m = new GupiaoKline5m();
-                        BeanUtils.copyProperties(t, gupiaoKline5m);
-                        return gupiaoKline5m;
-                    })
-                    .collect(Collectors.toList());
-//            log.info("-------数据处理时长--1---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
-            gupiaoKline5mRepository.saveAll(list); //保存新增数据
-//            log.info("-------数据处理时长--2---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
-        } else if (listKline.get(0).getPeriod()==KlineEnum.K_30M.getId()){
-            List<String> bizDate = gupiaoKlineRepository.listKlineBizDate30m(listKline.get(0).getSymbol());
-            List<GupiaoKline30m> list = listKline.stream()
-                    .filter(x -> bizDate.contains(x.getBizDate()))
-                    .map(t -> {
-                GupiaoKline30m gupiaoKline30m = new GupiaoKline30m();
-                BeanUtils.copyProperties(t, gupiaoKline30m);
-                return gupiaoKline30m;
-            }).collect(Collectors.toList());
-//            log.info("-------数据处理时长--3---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
-            gupiaoKline30mRepository.saveAll(list); //保存新增数据
-//            log.info("-------数据处理时长--4---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "");
-        } else if (listKline.get(0).getPeriod()==KlineEnum.K_1D.getId()){
+            save5mKline(listKline);
+            return;
+        }
+        if (listKline.get(0).getPeriod()== KlineEnum.K_15M.getId()){
+            save15mKline(listKline);
+            return;
+        }
+        if (listKline.get(0).getPeriod()== KlineEnum.K_30M.getId()){
+            save30mKline(listKline);
+            return;
+        }
+
+        if (listKline.get(0).getPeriod()==KlineEnum.K_1D.getId()){
             List<String> bizDate = gupiaoKlineRepository.listKlineBizDate(listKline.get(0).getSymbol());
             List<GupiaoKline> list = listKline.stream()
                     .filter(x -> bizDate.contains(x.getBizDate()))

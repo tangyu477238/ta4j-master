@@ -44,6 +44,8 @@ public class KzzStrategy {
         List<GupiaoKline> listKline = null;
         if (period==5){
             listKline = gupiaoKlineRepository.getKline5m(bondId);
+        } else if (period==15){
+            listKline = gupiaoKlineRepository.getKline15m(bondId);
         } else if (period==30){
             listKline = gupiaoKlineRepository.getKline30m(bondId);
         } else if (period==101){

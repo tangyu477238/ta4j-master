@@ -41,32 +41,44 @@ public class TodayTasks {
     /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+//    /***
+//     *  5分钟级别
+//     * 30秒同步一次
+//     */
+//    @Scheduled(cron = "${task.today.xinhao.5m}")
+//    public void todayKzzBy5m() {
+//        if ("0".equals(consumerOff)) return;
+//        Date current = new Date();
+//        log.info(MessageFormat.format("todayKzzBy5m，Date：{0}",FORMAT.format(current)));
+//        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(5);
+//
+//    }
+
     /***
-     *  5分钟级别
+     *  15分钟级别
      * 30秒同步一次
      */
-    @Scheduled(cron = "${task.today.xinhao.5m}")
-    public void todayKzzBy5m() {
+    @Scheduled(cron = "${task.today.xinhao.15m}")
+    public void todayKzzBy15m() {
         if ("0".equals(consumerOff)) return;
         Date current = new Date();
-        log.info(MessageFormat.format("todayKzzBy5m，Date：{0}",FORMAT.format(current)));
-        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(5);
+        log.info(MessageFormat.format("todayKzzBy15m，Date：{0}",FORMAT.format(current)));
+        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(15);
 
     }
 
-
-    /***
-     *  30分钟级别
-     * 2分 同步一次
-     */
-    @Scheduled(cron = "${task.today.xinhao.30m}")
-    public void todayKzzBy30m() {
-        if ("0".equals(consumerOff)) return;
-        Date current = new Date();
-        log.info(MessageFormat.format("todayKzzBy30m，Date：{0}",FORMAT.format(current)));
-        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(30);
-
-    }
+//    /***
+//     *  30分钟级别
+//     * 2分 同步一次
+//     */
+//    @Scheduled(cron = "${task.today.xinhao.30m}")
+//    public void todayKzzBy30m() {
+//        if ("0".equals(consumerOff)) return;
+//        Date current = new Date();
+//        log.info(MessageFormat.format("todayKzzBy30m，Date：{0}",FORMAT.format(current)));
+//        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(30);
+//
+//    }
 
 
 
