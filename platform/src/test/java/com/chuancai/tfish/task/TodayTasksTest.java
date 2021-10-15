@@ -23,11 +23,14 @@
  */
 package com.chuancai.tfish.task;
 
+import com.chuancai.tfish.manager.GupiaoXinhaoManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.annotation.Resource;
 
 /**
  * Quickstart for ta4j.
@@ -40,21 +43,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class TodayTasksTest {
 
 
-
+    @Resource
+    private TodayTasks todayTasks;
 
     @Test
-    public void getData() {
+    public void todayKzzBy120m() {
 
-        String bondId = "123102";
-        Integer period = 5; //按天
-//        BarSeries series = kzzStrategy.getBarSeries(bondId,period); //获取k数据
-//        List<GupiaoXinhao> listXinhao = kzzStrategy.addZjrcIndicator(series,period); //数据
-//        gupiaoXinhaoManager.saveGupiaoXinhao(listXinhao);
-
-
-
-
-
+        todayTasks.todayKzzBy120m();
 
     }
 
