@@ -44,6 +44,12 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
     @Resource
     private GupiaoKline30mRepository gupiaoKline30mRepository; //获取30k线对象
 
+    @Resource
+    private GupiaoKline60mRepository gupiaoKline60mRepository; //获取60k线对象
+
+    @Resource
+    private GupiaoKline120mRepository gupiaoKline120mRepository; //获取120k线对象
+
     @Override
     public void saveGupiaoXinhao(List<GupiaoXinhao> list) {
         List<GupiaoXinhao> addList = new ArrayList();
@@ -127,9 +133,10 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             return;
         }
         Collections.reverse(listKline); // 反转lists
+        log.info(period+"-------calculateZjrc数据处理开始---" + symbol);
         BarSeries series = kzzStrategy.getBarSeries(listKline);  //初始化数据
         saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据
-         log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
+        log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
     }
 
 
@@ -747,7 +754,28 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 }).collect(Collectors.toList());
         gupiaoKline30mRepository.saveAll(list); //保存新增数据
     }
-
+    void save60mKline(List<GupiaoKline> listKline){
+        List<String> bizDate = gupiaoKlineRepository.listKlineBizDate60m(listKline.get(0).getSymbol());
+        List<GupiaoKline60m> list = listKline.stream()
+                .filter(x -> bizDate.contains(x.getBizDate()))
+                .map(t -> {
+                    GupiaoKline60m gupiaoKline60m = new GupiaoKline60m();
+                    BeanUtils.copyProperties(t, gupiaoKline60m);
+                    return gupiaoKline60m;
+                }).collect(Collectors.toList());
+        gupiaoKline60mRepository.saveAll(list); //保存新增数据
+    }
+    void save120mKline(List<GupiaoKline> listKline){
+        List<String> bizDate = gupiaoKlineRepository.listKlineBizDate120m(listKline.get(0).getSymbol());
+        List<GupiaoKline120m> list = listKline.stream()
+                .filter(x -> bizDate.contains(x.getBizDate()))
+                .map(t -> {
+                    GupiaoKline120m gupiaoKline120m = new GupiaoKline120m();
+                    BeanUtils.copyProperties(t, gupiaoKline120m);
+                    return gupiaoKline120m;
+                }).collect(Collectors.toList());
+        gupiaoKline120mRepository.saveAll(list); //保存新增数据
+    }
 
     private void saveKline(List<GupiaoKline> listKline){
         if (ComUtil.isEmpty(listKline)){
@@ -763,6 +791,14 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         }
         if (listKline.get(0).getPeriod()== KlineEnum.K_30M.getId()){
             save30mKline(listKline);
+            return;
+        }
+        if (listKline.get(0).getPeriod()== KlineEnum.K_60M.getId()){
+            save60mKline(listKline);
+            return;
+        }
+        if (listKline.get(0).getPeriod()== KlineEnum.K_120M.getId()){
+            save120mKline(listKline);
             return;
         }
 

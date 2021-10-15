@@ -28,6 +28,11 @@ public interface GupiaoKlineRepository extends JpaRepository<GupiaoKline,Integer
     @Query(value = "select * from gupiao_kline_30m where symbol = ?1  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
     List<GupiaoKline> getKline30m(String bondId);
 
+    @Query(value = "select * from gupiao_kline_60m where symbol = ?1  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
+    List<GupiaoKline> getKline60m(String bondId);
+
+    @Query(value = "select * from gupiao_kline_120m where symbol = ?1  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
+    List<GupiaoKline> getKline120m(String bondId);
 
     @Query(value = "select * from gupiao_kline where symbol = ?1 order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
     List<GupiaoKline> getKline(String bondId);
@@ -43,6 +48,10 @@ public interface GupiaoKlineRepository extends JpaRepository<GupiaoKline,Integer
     @Query(value = "select biz_date as bizDate from gupiao_kline_30m where symbol = ?1 and yi_high is null  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
     List<String> listKlineBizDate30m(String bondId);
 
+    @Query(value = "select biz_date as bizDate from gupiao_kline_60m where symbol = ?1 and yi_high is null  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
+    List<String> listKlineBizDate60m(String bondId);
+    @Query(value = "select biz_date as bizDate from gupiao_kline_120m where symbol = ?1 and yi_high is null  order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
+    List<String> listKlineBizDate120m(String bondId);
 
     @Query(value = "select biz_date as bizDate from gupiao_kline where symbol = ?1 and yi_high is null order by biz_date desc  LIMIT 0, 500 ", nativeQuery = true)
     List<String> listKlineBizDate(String bondId);

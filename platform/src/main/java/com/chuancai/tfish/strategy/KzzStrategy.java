@@ -1,5 +1,6 @@
 package com.chuancai.tfish.strategy;
 
+import com.chuancai.tfish.enums.KlineEnum;
 import com.chuancai.tfish.indicators.EmaMACDIndicator;
 import com.chuancai.tfish.indicators.JAXIndicator;
 import com.chuancai.tfish.indicators.XLPLAIndicator;
@@ -42,13 +43,17 @@ public class KzzStrategy {
 
     public List<GupiaoKline> listKine(String bondId, Integer period){
         List<GupiaoKline> listKline = null;
-        if (period==5){
+        if (period == KlineEnum.K_5M.getId()){
             listKline = gupiaoKlineRepository.getKline5m(bondId);
-        } else if (period==15){
+        } else if (period == KlineEnum.K_15M.getId()){
             listKline = gupiaoKlineRepository.getKline15m(bondId);
-        } else if (period==30){
+        } else if (period == KlineEnum.K_30M.getId()){
             listKline = gupiaoKlineRepository.getKline30m(bondId);
-        } else if (period==101){
+        }  else if (period == KlineEnum.K_60M.getId()){
+            listKline = gupiaoKlineRepository.getKline60m(bondId);
+        } else if (period == KlineEnum.K_120M.getId()){
+            listKline = gupiaoKlineRepository.getKline120m(bondId);
+        }else if (period == KlineEnum.K_1D.getId()){
             listKline = gupiaoKlineRepository.getKline(bondId);
         }
         return listKline;
