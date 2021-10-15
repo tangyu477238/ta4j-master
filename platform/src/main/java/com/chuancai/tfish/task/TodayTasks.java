@@ -80,6 +80,31 @@ public class TodayTasks {
 
     }
 
+    /***
+     *  60分钟级别
+     * 2分 同步一次
+     */
+    @Scheduled(cron = "${task.today.xinhao.60m}")
+    public void todayKzzBy60m() {
+        if ("0".equals(consumerOff)) return;
+        Date current = new Date();
+        log.info(MessageFormat.format("todayKzzBy60m，Date：{0}",FORMAT.format(current)));
+        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(60);
+
+    }
+
+    /***
+     *  120分钟级别
+     * 2分 同步一次
+     */
+    @Scheduled(cron = "${task.today.xinhao.120m}")
+    public void todayKzzBy120m() {
+        if ("0".equals(consumerOff)) return;
+        Date current = new Date();
+        log.info(MessageFormat.format("todayKzzBy120m，Date：{0}",FORMAT.format(current)));
+        gupiaoXinhaoManager.sysnGupiaoXinhaoAll(120);
+
+    }
 
 
     /***
