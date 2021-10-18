@@ -129,22 +129,30 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
 
     private void calculateZjrc(String symbol, Integer period){
-        Date date1 = new Date();
+        log.info(period+"-------calculate数据处理开始---" + symbol);
         List<GupiaoKline> listKline = kzzStrategy.listKine(symbol, period); //获取k数据
         if (ComUtil.isEmpty(listKline)){
             return;
         }
-        GupiaoXinhao gupiaoXinhao = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(symbol,
+        Collections.reverse(listKline); // 反转lists
+        BarSeries series = kzzStrategy.getBarSeries(listKline);  //初始化数据
+/////////////////////////////////////////////////////////////
+        Date date1 = new Date();
+        GupiaoXinhao zjrc = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(symbol,
                 "zjrc", listKline.get(0).getBizDate(), period); //验证是否已处理
-        if (!ComUtil.isEmpty(gupiaoXinhao)){
+        if (!ComUtil.isEmpty(zjrc)){
             return;
         }
-        Collections.reverse(listKline); // 反转lists
-        log.info(period+"-------calculateZjrc数据处理开始---" + symbol);
-        BarSeries series = kzzStrategy.getBarSeries(listKline);  //初始化数据
         saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据 zjrc
+        log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
+/////////////////////////////////////////////////////////////
+        date1 = new Date();
+        GupiaoXinhao ma = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(symbol,
+                "ma", listKline.get(0).getBizDate(), period); //验证是否已处理
+        if (!ComUtil.isEmpty(ma)){
+            return;
+        }
         saveGupiaoXinhao(kzzStrategy.addMaIndicator(series, listKline)); //计算数据 ma
-
         log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
     }
 
