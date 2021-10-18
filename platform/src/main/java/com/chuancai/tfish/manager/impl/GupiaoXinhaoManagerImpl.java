@@ -136,24 +136,23 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         }
         Collections.reverse(listKline); // 反转lists
         BarSeries series = kzzStrategy.getBarSeries(listKline);  //初始化数据
-/////////////////////////////////////////////////////////////
+/////////////////////////////////////Zjrc////////////////////////
         Date date1 = new Date();
         GupiaoXinhao zjrc = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(symbol,
                 "zjrc", listKline.get(0).getBizDate(), period); //验证是否已处理
-        if (!ComUtil.isEmpty(zjrc)){
-            return;
+        if (ComUtil.isEmpty(zjrc)){
+            saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据 zjrc
+            log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
         }
-        saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据 zjrc
-        log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
-/////////////////////////////////////////////////////////////
+
+////////////////////////////////////////Ma/////////////////////
         date1 = new Date();
         GupiaoXinhao ma = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(symbol,
                 "ma", listKline.get(0).getBizDate(), period); //验证是否已处理
-        if (!ComUtil.isEmpty(ma)){
-            return;
+        if (ComUtil.isEmpty(ma)){
+            saveGupiaoXinhao(kzzStrategy.addMaIndicator(series, listKline)); //计算数据 ma
+            log.info(period+"-------calculateMa数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
         }
-        saveGupiaoXinhao(kzzStrategy.addMaIndicator(series, listKline)); //计算数据 ma
-        log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
     }
 
 
