@@ -129,7 +129,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 
 
     private void calculateZjrc(String symbol, Integer period){
-        log.info(period+"-------calculate数据处理开始---" + symbol);
+//        log.info(period+"-------calculate数据处理开始---" + symbol);
         List<GupiaoKline> listKline = kzzStrategy.listKine(symbol, period); //获取k数据
         if (ComUtil.isEmpty(listKline)){
             return;
@@ -142,7 +142,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 "zjrc", listKline.get(0).getBizDate(), period); //验证是否已处理
         if (ComUtil.isEmpty(zjrc)){
             saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据 zjrc
-            log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
+//            log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
         }
 
 ////////////////////////////////////////Ma/////////////////////
@@ -151,7 +151,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
                 "ma", listKline.get(0).getBizDate(), period); //验证是否已处理
         if (ComUtil.isEmpty(ma)){
             saveGupiaoXinhao(kzzStrategy.addMaIndicator(series, listKline)); //计算数据 ma
-            log.info(period+"-------calculateMa数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
+//            log.info(period+"-------calculateMa数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
         }
     }
 
@@ -217,7 +217,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         Map<String, GupiaoKline> map = calculateDingDiByMerge(listDistinct); //根据(trend)进行计算趋势 yi_trend
         toCopyKline(listKline, map); //转换和筛选可用数据
         saveKline(listKline);
-        log.info(period+"-------calculateTrend数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
+//        log.info(period+"-------calculateTrend数据处理时长-----" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
     }
 
 
