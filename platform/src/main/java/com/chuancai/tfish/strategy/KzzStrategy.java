@@ -228,7 +228,13 @@ public class KzzStrategy {
 
     }
 
-    private void addMaIndicator(BarSeries series,String bondId){
+    public List<GupiaoXinhao> addMaIndicator(BarSeries series, List<GupiaoKline> listKline){
+        List<GupiaoXinhao> list = new ArrayList<>();
+        if (ComUtil.isEmpty(series)){
+            return list;
+        }
+        GupiaoXinhao gupiaoXinhao;
+
         ClosePriceIndicator closePrice = new ClosePriceIndicator(series);
         SMAIndicator ma5 = new SMAIndicator(closePrice, 5); //收盘价>5均线
         SMAIndicator ma10 = new SMAIndicator(closePrice, 10); //收盘价>10均线
@@ -239,20 +245,32 @@ public class KzzStrategy {
 
         int nbBars = series.getBarCount();
         for (int i = 0; i < nbBars; i++) {
-            GupiaoXinhao gupiaoXinhao = new GupiaoXinhao();
-            gupiaoXinhao.setBizDate(series.getBar(i).getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE));
-            gupiaoXinhao.setSymbol(bondId);
+            gupiaoXinhao = new GupiaoXinhao();
+            gupiaoXinhao.setBizDate(getBizDate(listKline, i));
+            gupiaoXinhao.setBizDate2(getBizDate(listKline, i-1));
+            gupiaoXinhao.setBizDate3(getBizDate(listKline, i-2));
+            gupiaoXinhao.setBizDate4(getBizDate(listKline, i-3));
+            gupiaoXinhao.setBizDate5(getBizDate(listKline, i-4));
+            gupiaoXinhao.setBizDate6(getBizDate(listKline, i-5));
+            gupiaoXinhao.setBizDate7(getBizDate(listKline, i-6));
+            gupiaoXinhao.setBizDate8(getBizDate(listKline, i-7));
+            gupiaoXinhao.setBizDate9(getBizDate(listKline, i-8));
+            gupiaoXinhao.setBizDate10(getBizDate(listKline, i-9));
+
+            gupiaoXinhao.setSymbol(series.getName());
             gupiaoXinhao.setType(3);
             gupiaoXinhao.setTypeName("ma");
+            gupiaoXinhao.setPeriod(listKline.get(i).getPeriod());
+
             gupiaoXinhao.setSj1(new BigDecimal(ma5.getValue(i).doubleValue()));
             gupiaoXinhao.setSj2(new BigDecimal(ma10.getValue(i).doubleValue()));
             gupiaoXinhao.setSj3(new BigDecimal(ma20.getValue(i).doubleValue()));
             gupiaoXinhao.setSj4(new BigDecimal(ma60.getValue(i).doubleValue()));
             gupiaoXinhao.setSj5(new BigDecimal(ma120.getValue(i).doubleValue()));
             gupiaoXinhao.setSj5(new BigDecimal(ma240.getValue(i).doubleValue()));
-            gupiaoXinhaoRepository.save(gupiaoXinhao);
+            list.add(gupiaoXinhao);
         }
-
+        return list;
     }
 
 

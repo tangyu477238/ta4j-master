@@ -53,7 +53,8 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
     @Override
     public void saveGupiaoXinhao(List<GupiaoXinhao> list) {
         List<GupiaoXinhao> addList = new ArrayList();
-        String maxBizDate = gupiaoXinhaoRepository.getMaxBizDate(list.get(0).getSymbol(),list.get(0).getPeriod(),"zjrc");
+        String maxBizDate = gupiaoXinhaoRepository.getMaxBizDate(list.get(0).getSymbol(),
+                list.get(0).getPeriod(), list.get(0).getTypeName());
         for (GupiaoXinhao gupiaoXinhao : list) {
             if (!ComUtil.isEmpty(maxBizDate)
                     && maxBizDate.compareTo(gupiaoXinhao.getBizDate()) >= 0){ //已经存在的信号,不在计算和验证
@@ -61,6 +62,12 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
             }
             addList.add(gupiaoXinhao);
         }
+
+//        addList = list.stream()
+//                .filter(t->(!ComUtil.isEmpty(maxBizDate) && maxBizDate.compareTo(t.getBizDate()) >= 0))
+//                .collect(Collectors.toList());
+
+
 //        log.info("--------验证数-----"+DateTimeUtil.getSecondsOfTwoDate(date1,new Date())+"");date1 = new Date();
         if (ComUtil.isEmpty(addList)){
             return;
@@ -135,7 +142,9 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
         Collections.reverse(listKline); // 反转lists
         log.info(period+"-------calculateZjrc数据处理开始---" + symbol);
         BarSeries series = kzzStrategy.getBarSeries(listKline);  //初始化数据
-        saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据
+        saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据 zjrc
+        saveGupiaoXinhao(kzzStrategy.addMaIndicator(series, listKline)); //计算数据 ma
+
         log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
     }
 
