@@ -139,7 +139,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 /////////////////////////////////////Zjrc////////////////////////
         Date date1 = new Date();
         GupiaoXinhao zjrc = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(symbol,
-                "zjrc", listKline.get(0).getBizDate(), period); //验证是否已处理
+                "zjrc", listKline.get(listKline.size()-1).getBizDate(), period); //验证是否已处理
         if (ComUtil.isEmpty(zjrc)){
             saveGupiaoXinhao(kzzStrategy.addZjrcIndicator(series, listKline)); //计算数据 zjrc
 //            log.info(period+"-------calculateZjrc数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
@@ -148,7 +148,7 @@ public class GupiaoXinhaoManagerImpl implements GupiaoXinhaoManager {
 ////////////////////////////////////////Ma/////////////////////
         date1 = new Date();
         GupiaoXinhao ma = gupiaoXinhaoRepository.findBySymbolAndTypeNameAndBizDateAndPeriod(symbol,
-                "ma", listKline.get(0).getBizDate(), period); //验证是否已处理
+                "ma", listKline.get(listKline.size()-1).getBizDate(), period); //验证是否已处理
         if (ComUtil.isEmpty(ma)){
             saveGupiaoXinhao(kzzStrategy.addMaIndicator(series, listKline)); //计算数据 ma
 //            log.info(period+"-------calculateMa数据处理时长---" + DateTimeUtil.getSecondsOfTwoDate(date1, new Date()) + "-------"+ symbol);
